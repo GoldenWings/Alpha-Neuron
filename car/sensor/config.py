@@ -22,5 +22,5 @@ picam_outputs = {'output_name': 'image_frame', 'output_type': 'sarray'}
 picam_config = Config(name='PiCam', inputs=picam_inputs, outputs=picam_outputs, is_active=True, is_threaded=True)
 
 # Package Configuration
-sensor_modules = [us_config, picam_config]
+sensor_modules = {us_config.name: us_config,picam_config.name: picam_config}
 sensor_config = Config(name='Sensor', modules=sensor_modules)

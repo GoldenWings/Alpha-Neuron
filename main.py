@@ -2,9 +2,8 @@
 
 """
 
-from controller import config as controller
-from sensor import config as sensor
-from pilot import car as car
+from car.controller import config as controller
+from car.sensor import config as sensor
 from pilot import config as pilot
 import sys
 import inspect
@@ -23,5 +22,5 @@ We can initialize objects from each active module based on configuration files
 objects = [] # List of all objects
 # Initialize car Object
 for name, obj in inspect.getmembers(sys.modules[controller.__name__]):
-        if inspect.isclass(obj) and controller_config.modules['name'] == name:
-            objects.append(obj)
+        if inspect.isclass(obj) and name in controller_config.modules and controller_config.modules['name'].is_active:
+            objects.append(obj())  # Initialize object and append

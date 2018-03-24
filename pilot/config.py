@@ -26,5 +26,5 @@ agent_outputs = [
 agent_config = Config(name='Agent', inputs=agent_inputs, outputs=agent_outputs, is_active=True, is_threaded=True)
 
 # Package Configuration
-pilot_modules = [trainer_config, agent_config]
+pilot_modules = {trainer_config.name: trainer_config, agent_config.name: agent_config}
 pilot_config = Config(name='Pilot', modules=pilot_modules)

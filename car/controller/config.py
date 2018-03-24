@@ -32,5 +32,6 @@ gamepad_config = Config(name='GamePad', inputs=gamepad_inputs, outputs=gamepad_o
                         is_threaded=True)
 
 # Package Configuration
-controller_modules = [motor_config, servo_config, gamepad_config]
+controller_modules = {motor_config.name: motor_config, servo_config.name: servo_config,
+                      gamepad_config.name: gamepad_config}
 controller_config = Config(name='Controller', modules=controller_modules)
