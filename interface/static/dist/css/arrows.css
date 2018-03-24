@@ -1,0 +1,25 @@
+/**
+ * CSS3 keyboard arrow keys
+ */
+
+.arrowswrapper {
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+    grid-template-rows: 60px 50px;
+    grid-gap: 10px;
+    background-color: #fff;
+    color: #444;
+}
+
+.arrowsbox {
+    background-color: white;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 150%;
+}
+
+.arrowsbox :active, .arrowsbox-active {
+    background-color: #444;
+    color: white;
+}

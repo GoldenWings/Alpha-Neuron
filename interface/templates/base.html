@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Alpha Neuron | {% block title %} {% endblock %}</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    {% block css-files %}
+    {% endblock %}
+    {% load staticfiles %}
+</head>
+<body {% block body-config %}{% endblock %}>
+<div class="wrapper">
+    <header class="main-header">
+
+        <!-- Logo -->
+        <a href="#" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><b>A</b>N</span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg"><b>Alpha</b> Neuron</span>
+        </a>
+
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <!-- Navbar Right Menu -->
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <!-- User Account: style can be found in dropdown.less -->
+                    <li class="dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <img src="{% if user.is_authenticated %}{{ user.trainer.picture }}
+    {% endif %}" class="user-image" alt="User Image">
+                            <span class="hidden-xs">{% if user.is_authenticated %}{{ user.get_full_name }}
+    {% endif %}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <!-- User image -->
+                            <li class="user-header">
+                                <img src="{% if user.is_authenticated %}{{ user.trainer.picture }}
+    {% endif %}" class="img-circle" alt="User Image">
+
+                                <p>
+                                    {% if user.is_authenticated %}{{ user.get_full_name }} - {{user.trainer.role}}
+                                    {% endif %}
+                                </p>
+                            </li>
+                            <!-- Menu Body -->
+                            <li class="user-body">
+                            </li>
+                            <!-- Menu Footer-->
+                            <li class="user-footer">
+                                <div class="pull-left">
+                                </div>
+                                <div class="pull-right">
+                                    <a href="../account/logout/" class="btn btn-default btn-flat">Sign out</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- Sidebar user panel -->
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="{% if user.is_authenticated %}{{ user.trainer.picture }}
+    {% endif %}" class="img-circle" alt="User Image">
+                </div>
+                <div class="pull-left info">
+                    <p>{% if user.is_authenticated %}{{ user.get_full_name }}
+                        {% endif %}</p>
+                </div>
+            </div>
+
+            <!-- sidebar menu: : style can be found in sidebar.less -->
+            <ul class="sidebar-menu" data-widget="tree">
+                <li class="header">MAIN NAVIGATION</li>
+                <li>
+                    <a href="{% url 'Agent:Agent' %}">
+                        <i class="fa fa-laptop"></i> <span>Agent</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'Trainer:Trainer' %}">
+                        <i class="fa fa-automobile"></i>
+                        <span>Trainer</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content">
+            {% block body-content %}
+            {% endblock %}
+        </section>
+    </div>
+    <!-- /.content-wrapper -->
+
+</div>
+
+{% block body-js %}
+{% endblock %}
+<script src="{% static 'dist/js/active.js' %}"></script>
+</body>
+</html>
