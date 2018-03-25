@@ -8,7 +8,7 @@ class Md10c(metaclass=Singleton):
     __md10c_dir_pin = MD10C_DIR_PIN
     __md10c_pwm_pin = MD10C_PWM_PIN
     __md10c_freq = MD10C_FREQ
-    __md10c_dir = 1
+    __md10c_dir_isforward = True
     __md10c_speed = 0
 
     def __init__(self):
@@ -20,11 +20,16 @@ class Md10c(metaclass=Singleton):
         self.p = GPIO.PWM(self.__md10c_pwm_pin, 1)  # initiate object from class PWM to handle pwm operation
         self.p.start(0)  # set the duty cycle by zero
 
-    def set_dir(self, direction):
-        if direction is 1:
+    def set_dir(self, isforward=True):
+        if isforward is True:
             GPIO.output(self.__md10c_dir_pin, GPIO.HIGH)
+            self.__md10c_dir_isforward = True
         else:
             GPIO.output(self.__md10c_dir_pin, GPIO.LOW)
+            self.__md10c_dir_isforward = False
+
+    def get_dir(self):
+        return self.__md10c_dir_isforward
 
     def set_speed(self, requested_speed):
         """
@@ -42,3 +47,7 @@ class Md10c(metaclass=Singleton):
             speed = (float(self.__md10c_freq) * float(requested_speed))  # calculate the speed required in Hz
             self.p.ChangeFrequency(speed)  # changing the frequency of pulse to the frequency of required speed
             self.p.ChangeDutyCycle(100 * requested_speed)  # setup the required duty cycle for the required speed)
+
+    def __del__(self):
+        GPIO.cleanup()  # cleaning up the channel used by md10c_dir & md10c_pwm
+        self.p.stop()  # stop the pwm duty cycle
