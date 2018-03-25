@@ -17,8 +17,8 @@ class Md10c:
         self.p = GPIO.PWM(self.__md10c_pwm, 1)  # initiate object from class PWM to handle pwm operation
         self.p.start(0)  # set the duty cycle by zero
 
-    def set_dir(self, dir):
-        if dir is 1:
+    def set_dir(self, direction):
+        if direction is 1:
             GPIO.output(self.__md10c_dir, GPIO.HIGH)
         else:
             GPIO.output(self.__md10c_dir, GPIO.LOW)
