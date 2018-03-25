@@ -1,10 +1,9 @@
 import RPi.GPIO as GPIO
 
 from car.hardware.config import MD10C_DIR_PIN, MD10C_FREQ, MD10C_PWM_PIN
-from utility.singleton import Singleton
 
 
-class Md10c(metaclass=Singleton):
+class Md10c:
     __md10c_dir_pin = MD10C_DIR_PIN
     __md10c_pwm_pin = MD10C_PWM_PIN
     __md10c_freq = MD10C_FREQ

@@ -1,8 +1,9 @@
 from car.hardware.config import MOTOR_SPEED, BREAKS
 from car.hardware.md10c import Md10c
+from utility.singleton import Singleton
 
 
-class Motor(Md10c):
+class Motor(Md10c, metaclass=Singleton):
 
     def __init__(self):
         super().__init__()
