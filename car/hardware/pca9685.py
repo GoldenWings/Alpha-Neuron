@@ -17,6 +17,7 @@ class Pca9685:
         self.pwm.set_pwm_freq(60)
 
     def __set_angle(self, channel, delta=170):
+        # delay = max(delta * 0.02, 0.02)
         zero_pulse = (self.servo_min + self.servo_max) / 2
         pulse_width = zero_pulse - self.servo_min
         pulse = zero_pulse + (pulse_width * self.current_angle / 80)
