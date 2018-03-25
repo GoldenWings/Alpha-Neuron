@@ -35,11 +35,6 @@ class UltrasonicFrame(threading.Thread):
         self.S.append(Hcsr04('l', self.pi, 9, 5))
 
     def get_frame(self):
-        '''
-            This function returns a frame and if the Mode is trainer and recording then call
-            store_session, if mode is agent then notify agent
-        :return: 1 Ultrasonic frame
-        '''
         for s in self.S:
             self.frame[s.name] = int(round(s.read(), 0))
         return self.frame
