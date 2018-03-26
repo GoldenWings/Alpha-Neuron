@@ -2,22 +2,23 @@ import threading
 
 from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL
 
+from car.hardware.config import ABS_Yaxis, ABs_Xaxis
 from car.hardware.f710 import F710
 from utility.singleton import Singleton
-
-ABS_Yaxis = [17, 1]
-ABs_Xaxis = [16, 3]
 
 
 class Gamepad(F710, metaclass=Singleton, threading.Thread):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, carObj=None):
+        F710.__init__(self)
+        threading.Thread.__init__(self)
+        if carObj is not None:
+            self.car = carObj
 
-    def __categorize(event):
+    def categorize(event):
         if event.type == EV_KEY:
             if event.value == 1:
-                pass
+                return
             if event.code == BTN_A:
                 print("start recording")
             elif event.code == BTN_B:
@@ -45,9 +46,7 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
                     print("go backward")
                 elif event.code in ABs_Xaxis:
                     print("go right")
-        else:
-            pass
 
     def run(self):
         for event in self.f710.read_loop():
-            self.__categorize(event)
+            self.categorize(event)
