@@ -1,4 +1,4 @@
-from car.hardware.config import MOTOR_SPEED, BREAKS
+from car.hardware.config import MOTOR_SPEED, BRAKES
 from car.hardware.md10c import Md10c
 from utility.singleton import Singleton
 
@@ -9,8 +9,9 @@ class Motor(Md10c, metaclass=Singleton):
         super().__init__()
 
     def move_backward(self):
-        self.stop_motor()
-        self.set_dir(False)
+        if self.get_dir():
+            self.brake()
+            self.set_dir(False)
         self.set_speed(MOTOR_SPEED)
 
     def move_forward(self):
@@ -18,8 +19,8 @@ class Motor(Md10c, metaclass=Singleton):
             self.set_dir(True)
         self.set_speed(MOTOR_SPEED)
 
-    def stop_motor(self):
-        self.set_speed(BREAKS)
+    def brake(self):
+        self.set_speed(BRAKES)
 
     def __del__(self):
-        Md10c.__del__()
+        super().__del__()
