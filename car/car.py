@@ -27,4 +27,8 @@ class Car:
         self.__motor.brake()
 
     def __del__(self):
-        pass
+        del self.__motor
+        del self.__servo
+        del self.__camera
+        del self.__ultrasonic
+        del self.__status
