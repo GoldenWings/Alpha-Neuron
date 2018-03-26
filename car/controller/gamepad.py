@@ -23,8 +23,10 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
             elif event.code == BTN_B:
                 print("stop recording")
             elif event.code == BTN_X:
+                # Start threads from car.start_threads()
                 print("activate agent")
             elif event.code == BTN_Y:
+                # Start threads from car.start_threads()
                 print("activate_tranier")
             elif event.code == BTN_TR:
                 print("BTN_TR")

@@ -8,8 +8,8 @@ class Servo(metaclass=Singleton, Pca9685):
         super().__init__()
         self.step = SERVO_STEP
 
-    def go_right(self):
+    def turn_right(self):
         self.set_angle((self.current_angle + self.step))
 
-    def go_left(self):
+    def turn_left(self):
         self.set_angle((self.current_angle - self.step))

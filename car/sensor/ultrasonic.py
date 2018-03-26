@@ -9,16 +9,13 @@ from utility.frameDic import FrameDict
 
 class UltrasonicFrame(threading.Thread):
 
-    def __init__(self, uprep=None):
+    def __init__(self, status):
         threading.Thread.__init__(self)
         self.pi = pigpio.pi()
         self.S = []
-        self.uprep = None
-        if uprep is not None:
-            self.uprep = uprep
         self.initialize_sonics()
         self.frame = FrameDict(f3=0, f4=0, r=0, b3=0, b2=0, b1=0, l=0, f1=0, f2=0)
-        self._start = True
+        self.status = status
 
     def initialize_sonics(self):
         if not self.pi.connected:
@@ -40,16 +37,13 @@ class UltrasonicFrame(threading.Thread):
         return self.frame
 
     def run(self):
-        self._start = True
-        # counter = 0
-        while self._start:
+        while self.status.sensor_started:
             for s in self.S:
                 s.trigger()
             time.sleep(0.5)
             self.get_frame()
 
     def stop(self):
-        self._start = False
         for s in self.S:
             s.cancel()
         self.pi.stop()

@@ -4,15 +4,15 @@ from car.hardware.config import MD10C_DIR_PIN, MD10C_FREQ, MD10C_PWM_PIN
 
 
 class Md10c:
-    __md10c_dir_pin = MD10C_DIR_PIN
-    __md10c_pwm_pin = MD10C_PWM_PIN
-    __md10c_freq = MD10C_FREQ
-    __md10c_dir_isforward = True
-    __md10c_speed = 0
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)  # method to setup mode of pin referring scheme
         GPIO.setwarnings(False)  # set warning mode off
+        self.__md10c_dir_pin = MD10C_DIR_PIN
+        self.__md10c_pwm_pin = MD10C_PWM_PIN
+        self.__md10c_freq = MD10C_FREQ
+        self.__md10c_dir_isforward = True
+        self.__md10c_speed = 0
         GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)  # setup md10c_dir to be output pin
         GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)  # setup md10c_pwm to be output pin
         GPIO.output(self.__md10c_dir_pin, GPIO.HIGH)  # setup md10c_dir to have HIGH signal of 1
