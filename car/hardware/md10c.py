@@ -6,15 +6,18 @@ from car.hardware.config import MD10C_DIR_PIN, MD10C_FREQ, MD10C_PWM_PIN
 class Md10c:
 
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)  # method to setup mode of pin referring scheme
-        GPIO.setwarnings(False)  # set warning mode off
+        if GPIO.getmode() is not GPIO.BOARD:
+            GPIO.setmode(GPIO.BOARD)  # method to setup mode of pin referring scheme
+        # GPIO.setwarnings(False)  # set warning mode off
         self.__md10c_dir_pin = MD10C_DIR_PIN
         self.__md10c_pwm_pin = MD10C_PWM_PIN
         self.__md10c_freq = MD10C_FREQ
         self.__md10c_dir_isforward = True
         self.__md10c_speed = 0
-        GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)  # setup md10c_dir to be output pin
-        GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)  # setup md10c_pwm to be output pin
+        if GPIO.gpio_function(self.__md10c_dir_pin) is not GPIO.OUT:
+            GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)  # setup md10c_dir to be output pin
+        if GPIO.gpio_function(self.__md10c_pwm_pin) is not GPIO.OUT:
+            GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)  # setup md10c_pwm to be output pin
         GPIO.output(self.__md10c_dir_pin, GPIO.HIGH)  # setup md10c_dir to have HIGH signal of 1
         self.p = GPIO.PWM(self.__md10c_pwm_pin, 1)  # initiate object from class PWM to handle pwm operation
         self.p.start(0)  # set the duty cycle by zero
@@ -48,5 +51,5 @@ class Md10c:
             self.p.ChangeDutyCycle(100 * requested_speed)  # setup the required duty cycle for the required speed)
 
     def __del__(self):
-        GPIO.cleanup()  # cleaning up the channel used by md10c_dir & md10c_pwm
+        GPIO.cleanup([MD10C_PWM_PIN, MD10C_DIR_PIN])  # cleaning up the channel used by md10c_dir & md10c_pwm
         self.p.stop()  # stop the pwm duty cycle
