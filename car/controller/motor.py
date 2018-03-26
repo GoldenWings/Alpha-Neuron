@@ -20,3 +20,6 @@ class Motor(Md10c, metaclass=Singleton):
 
     def stop_motor(self):
         self.set_speed(BREAKS)
+
+    def __del__(self):
+        Md10c.__del__()
