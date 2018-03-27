@@ -1,4 +1,7 @@
-class Car:
+from utility.singleton import Singleton
+
+
+class Car(metaclass=Singleton):
     def __init__(self, objects, threaded_objects):
         self.__threaded_objects = threaded_objects
         self.__objects = {**objects, **threaded_objects}
