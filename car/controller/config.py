@@ -28,8 +28,8 @@ gamepad_inputs = None
 gamepad_outputs = [
     {'output_name': 'movement_dir', 'output_type': 'integer'}, {'output_name': 'direction', 'output_type': 'integer'}
 ]
-gamepad_config = Config(name='GamePad', inputs=gamepad_inputs, outputs=gamepad_outputs, is_active=True,
-                        is_threaded=True, parameters='Car')
+gamepad_config = Config(name='Gamepad', inputs=gamepad_inputs, outputs=gamepad_outputs, is_active=True,
+                        is_threaded=True, parameters=['Car'])
 
 # Package Configuration
 controller_modules = {motor_config.name: motor_config, servo_config.name: servo_config,

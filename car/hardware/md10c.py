@@ -15,14 +15,10 @@ class Md10c:
         self.__md10c_speed = 0
         if GPIO.gpio_function(self.__md10c_dir_pin) is GPIO.OUT:
             GPIO.cleanup(self.__md10c_dir_pin)
-            GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)  # setup md10c_dir to be output pin
-        else:
-            GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)
         if GPIO.gpio_function(self.__md10c_pwm_pin) is GPIO.OUT:
             GPIO.cleanup(self.__md10c_pwm_pin)
-            GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)  # setup md10c_pwm to be output pin
-        else:
-            GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)
+        GPIO.setup(self.__md10c_dir_pin, GPIO.OUT)  # setup md10c_dir to be output pin
+        GPIO.setup(self.__md10c_pwm_pin, GPIO.OUT)
         GPIO.output(self.__md10c_dir_pin, GPIO.HIGH)  # setup md10c_dir to have HIGH signal of 1
         self.p = GPIO.PWM(self.__md10c_pwm_pin, 1)  # initiate object from class PWM to handle pwm operation
         self.p.start(0)  # set the duty cycle by zero

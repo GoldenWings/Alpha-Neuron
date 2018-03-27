@@ -9,11 +9,10 @@ from utility.singleton import Singleton
 
 class Gamepad(F710, metaclass=Singleton, threading.Thread):
 
-    def __init__(self, car_object=None):
+    def __init__(self, objects):
         F710.__init__(self)
         threading.Thread.__init__(self)
-        if car_object is not None:
-            self.car = car_object
+        self.car = objects.get('Car')
 
     def categorize(self, event):
         if event.type == EV_KEY:
