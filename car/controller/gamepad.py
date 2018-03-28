@@ -1,3 +1,10 @@
+# @GamePad setting:
+#     btn_x activate agent
+#     btn_y activate trainer
+#     btn_a breaks
+#     btn_b start recording
+#     btn_tr inc speed
+#     btn_tl dec speed
 import threading
 
 from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL
@@ -19,31 +26,51 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
             if event.value == 1:
                 return
             if event.code == BTN_A:
-                print("start recording")
+                self.car.brake()
+                print("breaks")
             elif event.code == BTN_B:
-                print("stop recording")
+                if self.car.status.is_recording:
+                    self.car.status.stop_recording()
+                    print("stop recording")
+                    return
+                self.car.status.start_recording()
+                print("start recording")
             elif event.code == BTN_X:
                 # Start threads from car.start_threads()
+                if self.car.status.is_agent:
+                    return
+                self.car.status.activate_agent()
+                self.car.start_threads()
                 print("activate agent")
             elif event.code == BTN_Y:
                 # Start threads from car.start_threads()
-                print("activate_tranier")
+                if self.car.status.is_trainer:
+                    return
+                self.car.status.activate_trainer()
+                self.car.start_threads()
+                print("activate trainer")
             elif event.code == BTN_TR:
+                self.car.inc_speed()
                 print("BTN_TR")
             elif event.code == BTN_TL:
+                self.car.dec_speed()
                 print("pause recording")
 
         elif event.type == EV_ABS:
             if event.value < 0:
                 if event.code in ABS_Yaxis:
+                    self.car.move_forward()
                     print("go forward")
                 elif event.code in ABs_Xaxis:
+                    self.car.turn_left()
                     print("go left")
 
             elif event.value > 0:
                 if event.code in ABS_Yaxis:
+                    self.car.move_backward()
                     print("go backward")
                 elif event.code in ABs_Xaxis:
+                    self.car.turn_right()
                     print("go right")
 
     def run(self):
