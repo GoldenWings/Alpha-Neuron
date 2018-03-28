@@ -1,5 +1,6 @@
 class Config:
-    def __init__(self, modules=None, name=None, inputs=None, outputs=None,is_active=True, is_threaded=None, parameters=[]):
+    def __init__(self, modules=None, name=None, class_name=None, inputs=None, outputs=None, is_active=True,
+                 is_threaded=None, parameters=[]):
         """
         Why default value of None?
         -> 2 Types of config : 1- PackageConfig e.x: controller, ModuleConfig ex: Motor
@@ -13,6 +14,7 @@ class Config:
         :param parameters: set of parameters for constructor
         """
         self.modules = modules
+        self.class_name = class_name
         self.name = name
         self.inputs = inputs
         self.outputs = outputs
@@ -22,5 +24,4 @@ class Config:
 
     @property
     def parameterized(self):
-        return True if self.parameters.count() > 0 else False
-
+        return True if len(self.parameters) > 0 else False
