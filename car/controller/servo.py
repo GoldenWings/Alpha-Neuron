@@ -3,7 +3,7 @@ from car.hardware.pca9685 import Pca9685
 from utility.singleton import Singleton
 
 
-class Servo(metaclass=Singleton, Pca9685):
+class Servo(Pca9685, metaclass=Singleton):
     def __init__(self):
         super().__init__()
         self.step = SERVO_STEP

@@ -6,16 +6,16 @@
 #     btn_tr inc speed
 #     btn_tl dec speed
 import threading
-from pilot.trainer.trainer_session import  *
 
 from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL
 
 from car.hardware.config import ABS_Yaxis, ABs_Xaxis
 from car.hardware.f710 import F710
+from pilot.trainer.trainer_session import *
 from utility.singleton import Singleton
 
 
-class Gamepad(F710, metaclass=Singleton, threading.Thread):
+class Gamepad(F710, threading.Thread, metaclass=Singleton):
 
     def __init__(self, objects):
         F710.__init__(self)
