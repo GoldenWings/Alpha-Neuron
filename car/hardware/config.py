@@ -4,6 +4,8 @@ This file will contain the configuration need for the hardware parts to work
 """
 # Motor speed
 MOTOR_STEP = 0.25
+MOTOR_MIN_SPEED = 0.25
+MOTOR_MAX_SPEED = 1
 BRAKES = 0
 
 # Md10c
