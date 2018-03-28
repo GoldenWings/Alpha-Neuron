@@ -44,14 +44,14 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
                 if self.car.status.is_agent:
                     return
                 self.car.status.activate_agent()
-                self.car.start_threads()
+                #self.car.start_threads()
                 print("activate agent")
             elif event.code == BTN_Y:
                 # Start threads from car.start_threads()
                 if self.car.status.is_trainer:
                     return
                 self.car.status.activate_trainer()
-                self.car.start_threads()
+                #self.car.start_threads()
                 print("activate trainer")
             elif event.code == BTN_TR:
                 self.car.inc_speed()
