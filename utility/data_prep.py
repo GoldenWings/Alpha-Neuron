@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+import collections
+from datetime import datetime
 
 
 def flip(images,labels,original_command,debug=False):
@@ -75,3 +77,30 @@ def apply_transformations(images):
     images = normalize_contrast(images)
     images = images / 255
     return images
+
+
+# Built so that a 3D convolution doesn't span multiple sessions (since there is no continuity between sessions)
+def video_to_rgb_npz(session_path,predictors,targets):
+    np.savez(session_path + '/predictors_and_targets', predictors=predictors,targets=targets)
+
+
+def make_gamma_tables(gammas):
+    gamma_map = collections.OrderedDict()
+    for gamma in gammas:
+        # build a lookup table mapping the pixel values [0, 255] to
+        # their adjusted gamma values
+        invGamma = 1.0 / gamma
+        table = np.array([((i / 255.0) ** invGamma) * 255
+                          for i in np.arange(0, 256)]).astype("uint8")
+        gamma_map[gamma] = table
+    return gamma_map
+
+
+def process_session(session_path,gamma_map,rgb=True):
+    cap = cv2.VideoCapture(session_path + "/output.mov")
+    video_timestamps = []
+    with open(session_path + '/video_timestamps.txt') as video_timestamps_reader:
+        for line in video_timestamps_reader:
+            line = line.replace("\n", "")
+            ts = datetime.strptime(line, '%Y-%m-%d %H:%M:%S.%f')
+            video_timestamps.append(ts)
