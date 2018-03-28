@@ -16,7 +16,8 @@ agent_inputs = [
 agent_outputs = [
     {'output_name': 'movement_dir', 'output_type': 'integer'}, {'output_name': 'direction', 'output_type': 'integer'}
 ]
-agent_config = Config(name='DrivingNeuralNetwork', inputs=agent_inputs, outputs=agent_outputs, is_active=True, is_threaded=True,
+agent_config = Config(name='driving_nn', class_name='DrivingNeuralNetwork', inputs=agent_inputs, outputs=agent_outputs,
+                      is_active=True, is_threaded=True,
                       parameters=['Car'])
 
 # Package Configuration
