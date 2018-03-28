@@ -5,6 +5,7 @@ class Car(metaclass=Singleton):
     def __init__(self, objects, threaded_objects):
         self.__threaded_objects = threaded_objects
         self.__objects = {**objects, **threaded_objects}
+        self.start_threads()
 
     @property
     def status(self):
