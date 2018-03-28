@@ -5,22 +5,15 @@ from django.dispatch import receiver
 from django.views import generic
 from django.http import JsonResponse
 import psutil
-from controllers.gamepad import GamePad
+from main import *
 from asyncore import loop
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'trainer.html'
-    gamepad = None
-    gamepad_isListening = False
 
     def __init__(self):
         super(TrainerView, self).__init__()
-        TrainerView.gamepad = GamePad()
-        TrainerView.gamepad.activate_tranier()
-        # if self.gamepad_isListening is False:
-        #     self.gamepad_isListening = True
-        #     loop()
 
 
     @receiver(user_logged_out)
@@ -36,32 +29,32 @@ def send_command(request):
     if command is None:
         return
     elif command == 'radar':
-        radar = TrainerView.gamepad.radar_data
+        radar = car.ultrasonic.get_frame()
     elif command == 'deactivate':
-        radar = TrainerView.gamepad.deactivate_trainer()
+        car.status.deactivate_trainer()
     elif command == 'usage':
         processor = psutil.cpu_percent()
         ram = psutil.virtual_memory().used / psutil.virtual_memory().total*100
     elif command == 'get_data':
-        speed = TrainerView.gamepad.current_speed
-    speed = TrainerView.gamepad.current_speed
+        speed = car.current_speed()
+    speed =car.current_speed()
     data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram}
     return JsonResponse(data)
 
 
 def start_recording(request):
-    TrainerView.gamepad.start_recording()
+    car.status.start_recording()
     data = {'clicked': 'start'}
     return JsonResponse(data)
 
 
 def pause_recording(request):
-    TrainerView.gamepad.pause_recording()
+    car.status.stop_recording()
     data = {'clicked': 'pause'}
     return JsonResponse(data)
 
 
 def stop_recording(request):
-    TrainerView.gamepad.stop_recording()
+    car.status.stop_recording()
     data = {'clicked': 'stop'}
     return JsonResponse(data)
