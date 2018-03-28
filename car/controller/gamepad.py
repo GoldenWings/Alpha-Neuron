@@ -20,6 +20,8 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
         F710.__init__(self)
         threading.Thread.__init__(self)
         self.car = objects.get('Car')
+        self.__abs_Yaxis_up = 0
+        self.__abs_Yaxis_down = 0
 
     def categorize(self, event):
         if event.type == EV_KEY:
@@ -59,16 +61,21 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
         elif event.type == EV_ABS:
             if event.value < 0:
                 if event.code in ABS_Yaxis:
-                    self.car.move_forward()
-                    print("go forward")
+                    self.__abs_Yaxis_up += 1
+                    if self.__abs_Yaxis_up > 5:
+                        self.car.move_forward()
+                        self.__abs_Yaxis_up = 0
+                        print("go forward")
                 elif event.code in ABs_Xaxis:
                     self.car.turn_left()
                     print("go left")
 
             elif event.value > 0:
                 if event.code in ABS_Yaxis:
-                    self.car.move_backward()
-                    print("go backward")
+                    self.__abs_Yaxis_down += 1
+                    if self.__abs_Yaxis_down > 5:
+                        self.car.move_backward()
+                        print("go backward")
                 elif event.code in ABs_Xaxis:
                     self.car.turn_right()
                     print("go right")
