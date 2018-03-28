@@ -101,7 +101,7 @@ for name, obj in inspect.getmembers(sys.modules['car.sensor']):
                     non_tp_objects[name] = obj()  #
 
 # Initialize pilot module objects
-for name, obj in inspect.getmembers(sys.modules[pilot.__name__]):
+for name, obj in inspect.getmembers(sys.modules['pilot.agent']):
         if inspect.isclass(obj) and name in pilot_config.modules and pilot_config.modules[name].is_active:
             if pilot_config.modules[name].parameterized:
                 # append to parameterized objects list for later Initialization
@@ -112,7 +112,17 @@ for name, obj in inspect.getmembers(sys.modules[pilot.__name__]):
                     non_p_objects[name] = obj()  # Initialize object and append to threaded non parameterized
                 else:
                     non_tp_objects[name] = obj()  # Initialize object and append to non threaded non parameterized
-
+        elif name in pilot_config.modules and inspect.ismodule(obj) and pilot_config.modules[name].is_active:
+            obj = getattr(obj, pilot_config.modules[name].class_name)
+            if pilot_config.modules[name].parameterized:
+                # append to parameterized objects dictionary for later Initialization
+                parameterized_objects[name] = [obj, pilot_config.modules[name].parameters,
+                                               pilot_config.modules[name].threaded]
+            else:
+                if pilot_config.modules[name].threaded:
+                    non_p_objects[name] = obj()  # Initialize object and append to threaded non parameterized
+                else:
+                    non_tp_objects[name] = obj()  #
 # Initialize parameterized objects
 """
     parameterized_objects structure:
