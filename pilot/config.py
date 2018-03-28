@@ -14,7 +14,7 @@ trainer_inputs = None
 trainer_outputs = [
     {'output_name': 'session_csv', 'output_type': 'csv'}
 ]
-trainer_config = Config(name='Trainer', inputs=trainer_inputs, outputs=trainer_outputs, is_active=True, is_threaded=False)
+trainer_config = Config(name='TrainerSession', inputs=trainer_inputs, outputs=trainer_outputs, is_active=True, is_threaded=False)
 
 # Agent
 agent_inputs = [
@@ -23,7 +23,8 @@ agent_inputs = [
 agent_outputs = [
     {'output_name': 'movement_dir', 'output_type': 'integer'}, {'output_name': 'direction', 'output_type': 'integer'}
 ]
-agent_config = Config(name='Agent', inputs=agent_inputs, outputs=agent_outputs, is_active=True, is_threaded=True)
+agent_config = Config(name='DrivingNeuralNetwork', inputs=agent_inputs, outputs=agent_outputs, is_active=True, is_threaded=True,
+                      parameters=['Car'])
 
 # Package Configuration
 pilot_modules = {trainer_config.name: trainer_config, agent_config.name: agent_config}
