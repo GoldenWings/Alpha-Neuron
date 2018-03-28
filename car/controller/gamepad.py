@@ -6,6 +6,7 @@
 #     btn_tr inc speed
 #     btn_tl dec speed
 import threading
+from pilot.trainer.trainer_session import  *
 
 from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL
 
@@ -29,7 +30,8 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
                 return
             if event.code == BTN_A:
                 self.car.brake()
-                print("breaks")
+                store_command('brake')
+                print("brake")
             elif event.code == BTN_B:
                 if self.car.status.is_recording:
                     self.car.status.stop_recording()
@@ -65,9 +67,11 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
                     if self.__abs_Yaxis_up > 5:
                         self.car.move_forward()
                         self.__abs_Yaxis_up = 0
+                        store_command('forward')
                         print("go forward")
                 elif event.code in ABs_Xaxis:
                     self.car.turn_left()
+                    store_command('left')
                     print("go left")
 
             elif event.value > 0:
@@ -75,9 +79,11 @@ class Gamepad(F710, metaclass=Singleton, threading.Thread):
                     self.__abs_Yaxis_down += 1
                     if self.__abs_Yaxis_down > 5:
                         self.car.move_backward()
+                        store_command('backward')
                         print("go backward")
                 elif event.code in ABs_Xaxis:
                     self.car.turn_right()
+                    store_command('right')
                     print("go right")
 
     def run(self):
