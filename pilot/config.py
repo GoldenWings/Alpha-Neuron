@@ -9,13 +9,6 @@ Usage:
 
 from utility.config import Config
 
-# Trainer
-trainer_inputs = None
-trainer_outputs = [
-    {'output_name': 'session_csv', 'output_type': 'csv'}
-]
-trainer_config = Config(name='TrainerSession', inputs=trainer_inputs, outputs=trainer_outputs, is_active=True, is_threaded=False)
-
 # Agent
 agent_inputs = [
     {'input_name': 'image_frame', 'input_type': 'sarray'}
@@ -27,5 +20,5 @@ agent_config = Config(name='DrivingNeuralNetwork', inputs=agent_inputs, outputs=
                       parameters=['Car'])
 
 # Package Configuration
-pilot_modules = {trainer_config.name: trainer_config, agent_config.name: agent_config}
+pilot_modules = {agent_config.name: agent_config}
 pilot_config = Config(name='Pilot', modules=pilot_modules)
