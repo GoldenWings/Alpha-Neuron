@@ -17,7 +17,7 @@ class Car(metaclass=Singleton):
 
     @property
     def ultrasonic(self):
-        return self.__objects['Ultrasonic']
+        return self.__objects['UltrasonicFrame']
 
     def start_threads(self):
         for obj in self.__threaded_objects:
