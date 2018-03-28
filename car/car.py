@@ -34,6 +34,15 @@ class Car(metaclass=Singleton):
     def move_backward(self):
         self.__objects['Motor'].move_backward()
 
+    def inc_speed(self):
+        self.__objects['Motor'].inc_speed()
+
+    def dec_speed(self):
+        self.__objects['Motor'].dec_speed()
+
+    def current_speed(self):
+        self.__objects['Motor'].get_speed()
+
     def brake(self):
         self.__objects['Motor'].brake()
 
