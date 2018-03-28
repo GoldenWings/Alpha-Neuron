@@ -1,4 +1,4 @@
-from car.hardware.config import MOTOR_STEP, BRAKES
+from car.hardware.config import MOTOR_STEP, MOTOR_MIN_SPEED, MOTOR_MAX_SPEED, BRAKES
 from car.hardware.md10c import Md10c
 from utility.singleton import Singleton
 
@@ -24,10 +24,14 @@ class Motor(Md10c, metaclass=Singleton):
         self.set_speed(BRAKES)
 
     def inc_speed(self):
+        if self.__current_speed is MOTOR_MAX_SPEED:
+            return
         self.__current_speed += MOTOR_STEP
         self.set_speed(self.__current_speed)
 
     def dec_speed(self):
+        if self.__current_speed is MOTOR_MIN_SPEED:
+            return
         self.__current_speed -= MOTOR_STEP
         self.set_speed(self.__current_speed)
 
