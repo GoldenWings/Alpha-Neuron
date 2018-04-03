@@ -32,7 +32,7 @@ gamepad_outputs = [
 ]
 gamepad_config = Config(name='gamepad', class_name='Gamepad', inputs=gamepad_inputs, outputs=gamepad_outputs,
                         is_active=True,
-                        is_threaded=True, parameters=['Car'])
+                        is_threaded=True, parameters=['car'])
 
 # Package Configuration
 controller_modules = {motor_config.name: motor_config, servo_config.name: servo_config,
