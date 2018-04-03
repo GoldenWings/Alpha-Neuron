@@ -5,6 +5,8 @@ Usage: Loads configuration and acts as starting point of the project
 import inspect
 import sys
 
+import utility.status
+import pilot.agent
 from car.car import Car
 from car.controller import config as controller
 from car.sensor import config as sensor
@@ -30,6 +32,8 @@ First Initialize non parameterized objects, and add parameterized objects into d
 non_tp_objects = {}  # Dictionary of non threaded non parameterized objects
 non_p_objects = {}  # Dictionary of threaded non parameterized objects
 parameterized_objects = {}  # Dictionary of all parameterized objects
+car = Car()
+non_p_objects['car'] = car
 # Initialize utility module objects
 for name, obj in inspect.getmembers(sys.modules['utility']):
         if inspect.isclass(obj) and name in utility_config.modules and utility_config.modules[name].is_active:
@@ -99,7 +103,6 @@ for name, obj in inspect.getmembers(sys.modules['car.sensor']):
                     non_p_objects[name] = obj()  # Initialize object and append to threaded non parameterized
                 else:
                     non_tp_objects[name] = obj()  #
-
 # Initialize pilot module objects
 for name, obj in inspect.getmembers(sys.modules['pilot.agent']):
         if inspect.isclass(obj) and name in pilot_config.modules and pilot_config.modules[name].is_active:
@@ -164,5 +167,4 @@ for key in list(parameterized_objects):
     del parameterized_objects[key]
 
 # Initialize car object
-print(non_tp_objects)
-car = Car(non_tp_objects, non_p_objects)
+car.initialize_objects(non_tp_objects, non_p_objects)
