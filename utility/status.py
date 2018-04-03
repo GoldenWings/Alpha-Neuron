@@ -18,7 +18,7 @@ class Status(metaclass=Singleton):
     
     @property
     def is_recording(self):
-        return self.is_recording
+        return self.__is_recording
 
     @property
     def sensor_started(self):
