@@ -9,20 +9,21 @@ from utility.data_prep import apply_transformations
 
 
 class DrivingNeuralNetwork:
-    def __init__(self, objects, checkpoint_dir_path):
-        start_epoch = get_prev_epoch(checkpoint_dir_path)
-        graph_name = 'model-' + str(start_epoch)
+    def __init__(self, objects, checkpoint_dir_path=''):
         self.__car = objects.get('Car')
-        checkpoint_file_path = os.path.join(checkpoint_dir_path, graph_name)
-        saver = tf.train.import_meta_graph(checkpoint_dir_path + "/" + graph_name + ".meta")
-        self.sess = tf.Session()
-        saver.restore(self.sess, checkpoint_file_path)
-        graph = tf.get_default_graph()
-        self.x = graph.get_tensor_by_name("x:0")
-        make_logits = graph.get_operation_by_name("logits")
-        logits = make_logits.outputs[0]
-        # A tensor representing the model's prediction
-        self.prediction = tf.argmax(logits, 1)
+        if checkpoint_dir_path is not '':
+            start_epoch = get_prev_epoch(checkpoint_dir_path)
+            graph_name = 'model-' + str(start_epoch)
+            checkpoint_file_path = os.path.join(checkpoint_dir_path, graph_name)
+            saver = tf.train.import_meta_graph(checkpoint_dir_path + "/" + graph_name + ".meta")
+            self.sess = tf.Session()
+            saver.restore(self.sess, checkpoint_file_path)
+            graph = tf.get_default_graph()
+            self.x = graph.get_tensor_by_name("x:0")
+            make_logits = graph.get_operation_by_name("logits")
+            logits = make_logits.outputs[0]
+            # A tensor representing the model's prediction
+            self.prediction = tf.argmax(logits, 1)
 
         self.frame_queue = queue.LifoQueue()
         self.prediction_thread = threading.Thread(name="Prediction thread",
