@@ -1,1 +1,1 @@
-FILE_PATH = ''
+FILE_PATH = 'data.txt'
