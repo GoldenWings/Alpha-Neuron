@@ -20,7 +20,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
     def __init__(self, objects):
         F710.__init__(self)
         threading.Thread.__init__(self)
-        self.car = objects.get('Car')
+        self.car = objects.get('car')
         self.__abs_Yaxis_up = 0
         self.__abs_Yaxis_down = 0
 
