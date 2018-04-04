@@ -33,6 +33,8 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 store_command('brake')
                 print("brake")
             elif event.code == BTN_B:
+                if not self.car.status.is_trainer:
+                    return
                 if self.car.status.is_recording:
                     self.car.status.stop_recording()
                     print("stop recording")
@@ -40,25 +42,24 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 self.car.status.start_recording()
                 print("start recording")
             elif event.code == BTN_X:
-                # Start threads from car.start_threads()
                 if self.car.status.is_agent:
                     return
                 self.car.status.activate_agent()
-                #self.car.start_threads()
+                self.car.start_sensor()
+                self.car.start_threads()
                 print("activate agent")
             elif event.code == BTN_Y:
-                # Start threads from car.start_threads()
                 if self.car.status.is_trainer:
                     return
                 self.car.status.activate_trainer()
-                #self.car.start_threads()
+                self.car.start_sensor()
                 print("activate trainer")
             elif event.code == BTN_TR:
                 self.car.inc_speed()
-                print("BTN_TR")
+                print("increase speed")
             elif event.code == BTN_TL:
                 self.car.dec_speed()
-                print("pause recording")
+                print("decrease speed")
 
         elif event.type == EV_ABS:
             if event.value < 0:
