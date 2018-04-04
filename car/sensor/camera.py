@@ -11,7 +11,7 @@ class PiCamera(Thread):
         Thread.__init__(self)
         # initialize the camera and stream
         self.status = objects.get('status')
-        self.agent = objects.get('agent')
+        self.agent = objects.get('driving_nn')
         self.resolution = resolution
         self.framerate = framerate
         self.camera = None
