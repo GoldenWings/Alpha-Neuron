@@ -6,22 +6,27 @@ class Car(metaclass=Singleton):
         self.__threaded_objects = None
         self.__objects = None
 
-    def initialize_objects(self, objects, threaded_objects):
+    def initialize_objects(self, objects, threaded_objects, sensor_objects):
         self.__threaded_objects = threaded_objects
         self.__objects = {**objects, **threaded_objects}
+        self.__sensor_objects = sensor_objects
         self.start_threads()
 
     @property
     def status(self):
-        return self.__objects['Status']
+        return self.__objects['status']
 
     @property
     def camera(self):
-        return self.__objects['Camera']
+        return self.__objects['camera']
 
     @property
     def ultrasonic(self):
-        return self.__objects['UltrasonicFrame']
+        return self.__objects['ultrasonic']
+
+    def start_sensor(self):
+        for o in self.__sensor_objects.values():
+            o.start()
 
     def start_threads(self):
         for obj in self.__threaded_objects.values():
