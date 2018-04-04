@@ -15,7 +15,7 @@ class UltrasonicFrame(threading.Thread):
         self.S = []
         self.initialize_sensor()
         self.frame = FrameDict(f3=0, f4=0, r=0, b3=0, b2=0, b1=0, l=0, f1=0, f2=0)
-        self.status = objects.get('Status')
+        self.status = objects.get('status')
 
     def initialize_sensor(self):
         if self.pi is not None:
