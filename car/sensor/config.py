@@ -13,7 +13,7 @@ us_inputs = None
 us_outputs = [
     {'output_name': 'us_frame', 'output_type': 'FrameDict'}
 ]
-us_config = Config(name='UltrasonicFrame', class_name='UltrasonicFrame', inputs=us_inputs, outputs=us_outputs,
+us_config = Config(name='ultrasonic', class_name='UltrasonicFrame', inputs=us_inputs, outputs=us_outputs,
                    is_active=True, is_threaded=True,
                    parameters=['status'])
 
@@ -21,7 +21,7 @@ us_config = Config(name='UltrasonicFrame', class_name='UltrasonicFrame', inputs=
 
 picam_inputs = None
 picam_outputs = {'output_name': 'image_frame', 'output_type': 'sarray'}
-picam_config = Config(name='PiCamera', class_name='PiCamera', inputs=picam_inputs, outputs=picam_outputs,
+picam_config = Config(name='camera', class_name='PiCamera', inputs=picam_inputs, outputs=picam_outputs,
                       is_active=True, is_threaded=True,
                       parameters=['status', 'driving_nn'])
 
