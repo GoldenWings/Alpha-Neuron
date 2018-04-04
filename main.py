@@ -169,7 +169,7 @@ for key in list(parameterized_objects):
 
 
 # Separate sensor objects
-for k, v in list(non_p_objects):
+for k, v in non_p_objects.items():
     if k in sensor_config.modules:
         sensor_objects[k] = v
         del non_p_objects[k]
