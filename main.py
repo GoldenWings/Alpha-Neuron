@@ -32,6 +32,7 @@ First Initialize non parameterized objects, and add parameterized objects into d
 non_tp_objects = {}  # Dictionary of non threaded non parameterized objects
 non_p_objects = {}  # Dictionary of threaded non parameterized objects
 parameterized_objects = {}  # Dictionary of all parameterized objects
+sensor_objects = {}
 car = Car()
 non_p_objects['car'] = car
 # Initialize utility module objects
@@ -166,5 +167,12 @@ for key in list(parameterized_objects):
         non_tp_objects[key] = obj
     del parameterized_objects[key]
 
+
+# Separate sensor objects
+for k, v in list(non_p_objects):
+    if k in sensor_config.modules:
+        sensor_objects[k] = v
+        del non_p_objects[k]
+
 # Initialize car object
-car.initialize_objects(non_tp_objects, non_p_objects)
+car.initialize_objects(non_tp_objects, non_p_objects, sensor_objects)
