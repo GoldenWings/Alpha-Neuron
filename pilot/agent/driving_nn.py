@@ -10,7 +10,7 @@ from utility.data_prep import apply_transformations
 
 class DrivingNeuralNetwork:
     def __init__(self, objects, checkpoint_dir_path=''):
-        self.__car = objects.get('Car')
+        self.__car = objects.get('car')
         if checkpoint_dir_path is not '':
             start_epoch = get_prev_epoch(checkpoint_dir_path)
             graph_name = 'model-' + str(start_epoch)
