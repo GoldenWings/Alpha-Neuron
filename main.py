@@ -169,9 +169,9 @@ for key in list(parameterized_objects):
 
 
 # Separate sensor objects
-for k, v in non_p_objects.items():
+for k in list(non_p_objects):
     if k in sensor_config.modules:
-        sensor_objects[k] = v
+        sensor_objects[k] = non_p_objects[k]
         del non_p_objects[k]
 
 # Initialize car object
