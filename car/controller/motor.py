@@ -34,12 +34,14 @@ class Motor(Md10c, metaclass=Singleton):
 
     def inc_speed(self):
         if (self.__current_speed + MOTOR_STEP) > MOTOR_MAX_SPEED:
+            print("The maximum speed reached")
             return
         self.__current_speed += MOTOR_STEP
         self.set_speed(self.__current_speed)
 
     def dec_speed(self):
         if (self.__current_speed - MOTOR_STEP) < MOTOR_MIN_SPEED:
+            print("The minimum speed reached")
             return
         self.__current_speed -= MOTOR_STEP
         self.set_speed(self.__current_speed)
