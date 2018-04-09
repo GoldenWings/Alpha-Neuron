@@ -13,13 +13,18 @@ class Motor(Md10c, metaclass=Singleton):
         if self.get_dir():
             self.brake()
             self.set_dir(False)
+            self.__current_speed = MOTOR_MIN_SPEED
+            self.set_speed(self.__current_speed)
         else:
             return
         self.set_speed(self.__current_speed)
 
     def move_forward(self):
         if not self.get_dir():
+            self.brake()
             self.set_dir(True)
+            self.__current_speed = MOTOR_MIN_SPEED
+            self.set_speed(self.__current_speed)
         else:
             return
         self.set_speed(self.__current_speed)
@@ -28,13 +33,13 @@ class Motor(Md10c, metaclass=Singleton):
         self.set_speed(BRAKES)
 
     def inc_speed(self):
-        if self.__current_speed is MOTOR_MAX_SPEED:
+        if (self.__current_speed + MOTOR_STEP) > MOTOR_MAX_SPEED:
             return
         self.__current_speed += MOTOR_STEP
         self.set_speed(self.__current_speed)
 
     def dec_speed(self):
-        if self.__current_speed is MOTOR_MIN_SPEED:
+        if (self.__current_speed - MOTOR_STEP) < MOTOR_MIN_SPEED:
             return
         self.__current_speed -= MOTOR_STEP
         self.set_speed(self.__current_speed)
