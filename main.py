@@ -151,7 +151,7 @@ def get_parameters(parameterized_object):
             p_object[0] = p_object[0](get_parameters(p_object))
             p_param[param] = p_object[0]
             if p_object[2]:  # if threaded add to threaded non parameterized dictionary
-                non_p_objects[param] = p_object
+                non_p_objects[param] = p_object[0]
             else:
                 non_tp_objects[param] = p_object
     return p_param
@@ -160,6 +160,8 @@ def get_parameters(parameterized_object):
 for key in list(parameterized_objects):
     # [key] will return array, [0] will return the un-initialized object
     # After it return the un-initialized object it will initialize it using the parameters from get_parameters
+    if key not in parameterized_objects:
+        continue
     obj = parameterized_objects[key][0](get_parameters(parameterized_objects[key]))
     if parameterized_objects[key][2]:
         non_p_objects[key] = obj
