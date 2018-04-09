@@ -5,13 +5,14 @@ import cv2
 import pandas as pd
 from PIL import Image
 import numpy as np
+from datetime import datetime
 
 
+# noinspection PyTypeChecker
 class BarrelWriter(metaclass=Singleton):
-        def __init__(self, objects, current_session=False):
+        def __init__(self, objects):
             """
             :param objects: contains all objects required for the class
-            :param current_session: weather or not to save on the latest csv (Current session is the latest csv)
             """
             # I took objects of servo and motor instead of car to avoid circular dependencies
             # because picamera has reference to this class.
@@ -19,92 +20,71 @@ class BarrelWriter(metaclass=Singleton):
 
             self.servo = objects.get('servo')
             self.motor = objects.get('motor')
-            self.frame = None
-            self.current_session = current_session
             self.csv_name = None
 
-        def put_frame(self, frame):
+        # noinspection PyMethodMayBeStatic
+        def get_record(self, throttle, angle, img_name):
             """
-            Used from picamera to put frame to brake circular dependency from here to picamera
-            and let it one way dependency
-            :param frame: incoming frame from picamera
-            :return:
+            :return: return a dictionary that represents a record of the input and outputs
             """
-            self.frame = frame
 
-        def get_csv(self):
-            """
-            First check if its suppose to make new session or there is no csv files.
-            If its set to not to store on the current session then make new csv and set the current session to true
-                so next reading appended to the current csv.
-            If there is no csv then make new csv
-            if its suppose to store on the current session and there exist a csv then good to store.
-            if its suppose to store on the current session but somehow no file then make new csv.
-            """
-            csv_number = count_datasets()
-            if not self.current_session or csv_number == 0:
-                self.make_csv()
-                self.current_session = True
-            elif self.current_session:
-                self.csv_name = 'session' + str(csv_number) + '.csv'
-                if os.path.isfile(os.path.join(DATA_PATH, self.csv_name)):
-                    return
-                self.make_csv()
-
-        def get_record(self):
-            """
-            :return: a dictionary that represents a record of the input and outputs
-            """
-            angle = self.motor.throttle
-            throttle = self.servo.angle
-            img = self.frame
-            img_name = self.save_image(img)
             record = {'angle': angle, 'throttle': throttle, 'image': img_name}
             return record
 
-        def make_csv(self):
+        def save_csv(self):
             """
-            makes a new csv with a new name of csv_(number of csvs + 1)
+            makes a new csv with a unique name of session_( timestamp of now).csv
             then write the header for the csv which are the keys for the record dict (angle, throttle, image)
-            then write the content of dictionary
+            then for each image split its name and write the content of the name to a dictionary
+            then write it to record
             """
-            csv_number = count_datasets() + 1
-            self.csv_name = 'session_' + str(csv_number) + '.csv'
-            record = self.get_record()
+            timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+            self.csv_name = 'session_' + timestamp + '.csv'
+            headers = {'angle', 'throttle', 'image'}
             with open(self.csv_name, 'a') as f:
-                w = csv.DictWriter(f, record.keys())
+                w = csv.DictWriter(f, headers)
                 w.writeheader()
-                w.writerow(record)
+                for name in os.listdir(IMAGE_PATH):
+                    if os.path.isfile(os.path.join(IMAGE_PATH, name)):
+                        if os.path.splitext(name)[1] == '.jpg':
+                            full_name = name.split('_')
+                            throttle = full_name[2]
+                            angle = full_name[4].split('.')[0]
+                            record = self.get_record(throttle, angle, name)
+                            w.writerow(record)
 
-        def write_csv(self):
+        # noinspection PyMethodMayBeStatic
+        def abort_csv(self, start_time, end_time):
             """
-            is the starting point of the BarrelWriter class.
-            first check if there exist a csv_name (Ready to start writing)
-            or append to the latest csv.
+            loop through all files ing IMG_PATH/ , check if its a file or direction
+            if file split the date then compare date if it fall between the interval then remove image
+            :param start_time: session beginning time
+            :param end_time: session end time
+            :return:
             """
-            if self.csv_name is None:
-                self.get_csv()
-            else:
-                record = self.get_record()
-                with open(self.csv_name, 'a') as f:
-                    w = csv.DictWriter(f, record.keys())
-                    w.writerow(record)
+            start_time = datetime.strptime(start_time,  '%Y-%m-%d %H:%M:%S.%f')
+            end_time = datetime.strptime(end_time,  '%Y-%m-%d %H:%M:%S.%f')
+            for name in os.listdir(IMAGE_PATH):
+                if os.path.isfile(os.path.join(IMAGE_PATH, name)):
+                    if os.path.splitext(name)[1] == '.jpg':
+                        full_date = name.split(' ')
+                        date = full_date[0]
+                        time = full_date[1].split('_')[0]
+                        image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
+                        if start_time <= image_date <= end_time:
+                            os.remove(IMAGE_PATH + name)
 
         # noinspection PyMethodMayBeStatic
         def save_image(self, img):
             """
-            :param img: image to be stored
-            :return: full name of the image
+            :param img: image to be stored from picamera angle and throttle included
             """
-            img_number = count_images() + 1
-            # for testing store throttle and angle in image name for better visualization
             angle = self.servo.angle
             throttle = self.servo.throttle
-            full_name = "img_%d_ttl_%.3f_agl_%.1f%s" % (img_number, throttle, angle, ".jpg")
-            # next line for production
-            # full_name = IMAGE_PATH + '/img_' + str(img_number) + '.jpg'
+            timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
+            full_name = IMAGE_PATH + img_name
             cv2.imwrite(full_name, img)
-            return full_name
 
 
 class BarrelReader(metaclass=Singleton):
