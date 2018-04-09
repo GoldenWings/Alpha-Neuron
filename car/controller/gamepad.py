@@ -2,12 +2,15 @@
 #     btn_x activate agent
 #     btn_y activate trainer
 #     btn_a breaks
-#     btn_b start recording
+#     btn_b pause recording
 #     btn_tr inc speed
 #     btn_tl dec speed
+#     btn_start start recording
+#     btn_back save session
+#     btn_logitech abort session
 import threading
 
-from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL
+from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL, BTN_START, BTN_SELECT, BTN_MODE
 
 from car.hardware.config import ABS_Yaxis, ABs_Xaxis
 from car.hardware.f710 import F710
@@ -35,14 +38,10 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 store_command('brake')
                 print("brake")
             elif event.code == BTN_B:
-                if not self.car.status.is_trainer:
+                if self.car.status.is_agent:
                     return
-                if self.car.status.is_recording:
-                    self.car.status.stop_recording()
-                    print("stop recording")
-                    return
-                self.car.status.start_recording()
-                print("start recording")
+                self.car.status.stop_recording()
+                print("pause recording")
             elif event.code == BTN_X:
                 if self.car.status.is_agent:
                     return
@@ -62,7 +61,20 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
             elif event.code == BTN_TL:
                 self.car.dec_speed()
                 print("decrease speed")
-
+            elif event.code == BTN_START:
+                # logitech start BTN
+                if self.car.status.is_agent:
+                    return
+                self.car.status.start_recording()
+                print('start recording')
+            elif event.code == BTN_MODE:
+                # logitech main BTN
+                print("abort session")
+                pass
+            elif event.code == BTN_SELECT:
+                # logitech Back BTN
+                print('save session ')
+                pass
         elif event.type == EV_ABS:
             if event.value < 0:
                 if event.code in ABS_Yaxis:
@@ -79,7 +91,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         self.__abs_Xaxis_left = 0
                         if self.__abs_Xaxis_right < 3:
                             self.__abs_Xaxis_right = 0
-#                       store_command('left')
+                        #                       store_command('left')
                         print("go left")
 
             elif event.value > 0:
@@ -97,7 +109,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         self.__abs_Xaxis_right = 0
                         if self.__abs_Xaxis_left < 3:
                             self.__abs_Xaxis_left = 0
-#                       store_command('right')
+                        #                       store_command('right')
                         print("go right")
 
     def start(self):
