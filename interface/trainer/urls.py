@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^start_recording/$', views.start_recording, name='start_recording'),
     url(r'^pause_recording/$', views.pause_recording, name='pause_recording'),
     url(r'^stop_recording/$', views.stop_recording, name='stop_recording'),
+    url(r'^video/$', views.video, name='video'),
 ]
