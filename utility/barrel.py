@@ -31,7 +31,7 @@ class BarrelWriter(metaclass=Singleton):
             record = {'angle': angle, 'throttle': throttle, 'image': img_name}
             return record
 
-        def save_csv(self):
+        def save_csv(self, start_time):
             """
             makes a new csv with a unique name of session_( timestamp of now).csv
             then write the header for the csv which are the keys for the record dict (angle, throttle, image)
@@ -48,10 +48,16 @@ class BarrelWriter(metaclass=Singleton):
                     if os.path.isfile(os.path.join(IMAGE_PATH, name)):
                         if os.path.splitext(name)[1] == '.jpg':
                             full_name = name.split('_')
+                            full_date = name.split(' ')
+                            date = full_date[0]
+                            time = full_date[1].split('_')[0]
+                            image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
                             throttle = full_name[2]
                             angle = full_name[4].split('.')[0]
                             record = self.get_record(throttle, angle, name)
-                            w.writerow(record)
+                            if image_date >= start_time:
+                                w.writerow(record)
+
 
         # noinspection PyMethodMayBeStatic
         def abort_csv(self, start_time, end_time):
