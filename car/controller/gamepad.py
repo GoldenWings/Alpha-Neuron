@@ -24,10 +24,13 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
         F710.__init__(self)
         threading.Thread.__init__(self)
         self.car = objects.get('car')
+        self.barrel_writer = objects.get('barrelwriter')
         self.__abs_Yaxis_up = 0
         self.__abs_Yaxis_down = 0
         self.__abs_Xaxis_right = 0
         self.__abs_Xaxis_left = 0
+        self.__start_time = None
+        self.__end_time = None
 
     def categorize(self, event):
         if event.type == EV_KEY:
@@ -39,39 +42,67 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 print("brake")
             elif event.code == BTN_B:
                 if self.car.status.is_agent:
-                    return
-                self.car.status.stop_recording()
-                print("pause recording")
+                    print("Unable to pause recording while there is no recording on agent mode")
+                else:
+                    if self.car.status.is_recording:
+                        self.car.status.pause_recording()
+                        print("pause recording")
+                    else:
+                        print("there is no recording to pause")
             elif event.code == BTN_X:
                 if self.car.status.is_agent:
-                    return
-                self.car.status.activate_agent()
-                self.car.start_sensor()
-                self.car.start_threads()
-                print("activate agent")
+                    print("The agent is already activated")
+
+                else:
+                    if self.car.status.is_recording or self.car.status.is_paused:
+                        print("Unable to change the mode there is on going training session ")
+                    else:
+                        self.car.status.activate_agent()
+                        self.car.start_sensor()
+                        self.car.start_threads()
+                        print("activate agent")
             elif event.code == BTN_Y:
                 if self.car.status.is_trainer:
-                    return
-                self.car.status.activate_trainer()
-                self.car.start_sensor()
-                print("activate trainer")
+                    print("The trainer mode is already activated")
+                else:
+                    self.car.status.activate_trainer()
+                    self.car.start_sensor()
+                    print("activate trainer")
             elif event.code == BTN_TR:
-                self.car.inc_speed()
-                print("increase speed")
+                if self.car.status.is_trainer:
+                    self.car.inc_speed()
+                    print("increase speed")
+                else:
+                    print("can't inc speed on agent mode")
             elif event.code == BTN_TL:
-                self.car.dec_speed()
-                print("decrease speed")
+                if self.car.status.is_agent:
+                    self.car.dec_speed()
+                    print("decrease speed")
+                else:
+                    print("can't dec speed on agent mode")
             elif event.code == BTN_START:
                 # logitech start BTN
                 if self.car.status.is_agent:
-                    return
-                self.car.status.start_recording()
-                print('start recording')
+                    print("unable to start recording, the car is on agent mode")
+                else:
+                    if self.car.status.is_trainer and (not self.car.status.is_recording):
+                        if self.car.status.is_paused:
+                            self.car.status.continue_recording()
+                            print('continue recording')
+                        else:
+                            self.__start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                            self.car.status.start_recording()
+                            print('start recording')
             elif event.code == BTN_MODE:
                 # logitech main BTN
+                self.car.status.rest_recording_status()
+                self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
                 print("abort session")
             elif event.code == BTN_SELECT:
-                # logitech Back BTN
+                # logitech Back
+                self.car.status.rest_recording_status()
+                self.barrel_writer.save_csv()
                 print('save session ')
         elif event.type == EV_ABS:
             if event.value < 0:
