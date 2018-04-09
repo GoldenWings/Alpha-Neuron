@@ -58,7 +58,6 @@ class BarrelWriter(metaclass=Singleton):
                             if image_date >= start_time:
                                 w.writerow(record)
 
-
         # noinspection PyMethodMayBeStatic
         def abort_csv(self, start_time, end_time):
             """
