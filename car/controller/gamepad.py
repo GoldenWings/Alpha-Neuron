@@ -31,7 +31,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
 
     def categorize(self, event):
         if event.type == EV_KEY:
-            if event.value == 1:
+            if event.value == 0:
                 return
             if event.code == BTN_A:
                 self.car.brake()
@@ -70,11 +70,9 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
             elif event.code == BTN_MODE:
                 # logitech main BTN
                 print("abort session")
-                pass
             elif event.code == BTN_SELECT:
                 # logitech Back BTN
                 print('save session ')
-                pass
         elif event.type == EV_ABS:
             if event.value < 0:
                 if event.code in ABS_Yaxis:
