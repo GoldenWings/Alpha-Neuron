@@ -34,6 +34,9 @@ class DrivingNeuralNetwork:
         self.frame_queue.put(frame)
 
     def start(self):
+        self.prediction_thread = threading.Thread(name="Prediction thread",
+                                                      target=self.predict_from_queue,
+                                                      args=())
         self.prediction_thread.start()
 
     def predict_from_queue(self):
