@@ -14,8 +14,8 @@ from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BT
 
 from car.hardware.config import ABS_Yaxis, ABs_Xaxis
 from car.hardware.f710 import F710
-from pilot.trainer.trainer_session import *
 from utility.singleton import Singleton
+from datetime import datetime
 
 
 class Gamepad(F710, threading.Thread, metaclass=Singleton):
@@ -38,11 +38,10 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 return
             if event.code == BTN_A:
                 self.car.brake()
-                store_command('brake')
                 print("brake")
             elif event.code == BTN_B:
                 if self.car.status.is_agent:
-                    print("Unable to pause recording while there is no recording on agent mode")
+                    print("Agent mode has no recording state")
                 else:
                     if self.car.status.is_recording:
                         self.car.status.pause_recording()
@@ -75,7 +74,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 else:
                     print("can't inc speed on agent mode")
             elif event.code == BTN_TL:
-                if self.car.status.is_agent:
+                if self.car.status.is_trainer:
                     self.car.dec_speed()
                     print("decrease speed")
                 else:
@@ -85,7 +84,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 if self.car.status.is_agent:
                     print("unable to start recording, the car is on agent mode")
                 else:
-                    if self.car.status.is_trainer and (not self.car.status.is_recording):
+                    if self.car.status.is_trainer:
                         if self.car.status.is_paused:
                             self.car.status.continue_recording()
                             print('continue recording')
@@ -101,17 +100,17 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 print("abort session")
             elif event.code == BTN_SELECT:
                 # logitech Back
-                self.car.status.rest_recording_status()
+                self.car.status.reset_recording_status()
                 self.barrel_writer.save_csv(self.__start_time)
                 print('save session ')
-        elif event.type == EV_ABS:
+        elif event.type == EV_ABS and self.car.status.is_trainer:
+
             if event.value < 0:
                 if event.code in ABS_Yaxis:
                     self.__abs_Yaxis_up += 1
                     if self.__abs_Yaxis_up > 5:
                         self.car.move_forward()
                         self.__abs_Yaxis_up = 0
-                        store_command('forward')
                         print("go forward")
                 elif event.code in ABs_Xaxis:
                     self.__abs_Xaxis_left += 1
@@ -120,7 +119,6 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         self.__abs_Xaxis_left = 0
                         if self.__abs_Xaxis_right < 3:
                             self.__abs_Xaxis_right = 0
-                        #                       store_command('left')
                         print("go left")
 
             elif event.value > 0:
@@ -129,7 +127,6 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     if self.__abs_Yaxis_down > 5:
                         self.car.move_backward()
                         self.__abs_Yaxis_down = 0
-                        store_command('backward')
                         print("go backward")
                 elif event.code in ABs_Xaxis:
                     self.__abs_Xaxis_right += 1
@@ -138,7 +135,6 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         self.__abs_Xaxis_right = 0
                         if self.__abs_Xaxis_left < 3:
                             self.__abs_Xaxis_left = 0
-                        #                       store_command('right')
                         print("go right")
 
     def start(self):
