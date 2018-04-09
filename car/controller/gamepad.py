@@ -95,7 +95,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                             print('start recording')
             elif event.code == BTN_MODE:
                 # logitech main BTN
-                self.car.status.rest_recording_status()
+                self.car.status.reset_recording_status()
                 self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                 self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
                 print("abort session")
