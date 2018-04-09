@@ -9,13 +9,18 @@ import numpy as np
 
 class BarrelWriter(metaclass=Singleton):
         def __init__(self, objects, current_session=False):
-            '''
+            """
             :param objects: contains all objects required for the class
             :param current_session: weather or not to save on the latest csv (Current session is the latest csv)
-            '''
-            self._car = objects.get('car')
+            """
+            self.servo = objects.get('servo')
+            self.motor = objects.get('motor')
+            self.frame = None
             self.current_session = current_session
             self.csv_name = None
+
+        def put_frame(self, frame):
+            self.frame = frame
 
         def get_csv(self):
             """
@@ -40,9 +45,9 @@ class BarrelWriter(metaclass=Singleton):
             """
             :return: a dictionary that represents a record of the input and outputs
             """
-            angle = self._car.current_angle
-            throttle = self._car.current_speed
-            img = self._car.camera.frame
+            angle = self.motor.throttle
+            throttle = self.servo.angle
+            img = self.frame
             img_name = self.save_image(img)
             record = {'angle': angle, 'throttle': throttle, 'image': img_name}
             return record
@@ -83,8 +88,8 @@ class BarrelWriter(metaclass=Singleton):
             """
             img_number = count_images() + 1
             # for testing store throttle and angle in image name for better visualization
-            angle = self._car.current_angle
-            throttle = self._car.current_speed
+            angle = self.servo.angle
+            throttle = self.servo.throttle
             full_name = "img_%d_ttl_%.3f_agl_%.1f%s" % (img_number, throttle, angle, ".jpg")
             # next line for production
             # full_name = IMAGE_PATH + '/img_' + str(img_number) + '.jpg'
@@ -166,7 +171,7 @@ class BarrelReader(metaclass=Singleton):
         self.load_df()
         X_keys = ['image']
         Y_keys = ['angle', 'throttle']
-        train_df = train = self.df.sample(frac=train_frac, random_state=200)
+        train_df  = self.df.sample(frac=train_frac, random_state=200)
         val_df = self.df.drop(train_df.index)
 
         train_gen = self.generate_training(X_keys=X_keys, Y_keys=Y_keys, batch_size=batch_size, df=train_df)

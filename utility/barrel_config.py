@@ -1,8 +1,7 @@
 import os
 
-MODEL_PATH = ''
-DATA_PATH = ''
-IMAGE_PATH = ''
+DATA_PATH = '/Training Data/'
+IMAGE_PATH = '/Training Data/Images'
 
 
 def count_datasets():
