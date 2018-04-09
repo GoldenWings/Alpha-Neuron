@@ -23,7 +23,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
     def __init__(self, objects):
         F710.__init__(self)
         threading.Thread.__init__(self)
-        self.car = objects.get('car')
+        self.car = objects.get('car') 
         self.barrel_writer = objects.get('barrelwriter')
         self.__abs_Yaxis_up = 0
         self.__abs_Yaxis_down = 0
@@ -102,7 +102,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
             elif event.code == BTN_SELECT:
                 # logitech Back
                 self.car.status.rest_recording_status()
-                self.barrel_writer.save_csv()
+                self.barrel_writer.save_csv(self.__start_time)
                 print('save session ')
         elif event.type == EV_ABS:
             if event.value < 0:
