@@ -13,6 +13,10 @@ class BarrelWriter(metaclass=Singleton):
             :param objects: contains all objects required for the class
             :param current_session: weather or not to save on the latest csv (Current session is the latest csv)
             """
+            # I took objects of servo and motor instead of car to avoid circular dependencies
+            # because picamera has reference to this class.
+            # Picamera.barrel_writies._car.picamera.barrel_writer << :D
+
             self.servo = objects.get('servo')
             self.motor = objects.get('motor')
             self.frame = None
@@ -20,6 +24,12 @@ class BarrelWriter(metaclass=Singleton):
             self.csv_name = None
 
         def put_frame(self, frame):
+            """
+            Used from picamera to put frame to brake circular dependency from here to picamera
+            and let it one way dependency
+            :param frame: incoming frame from picamera
+            :return:
+            """
             self.frame = frame
 
         def get_csv(self):
@@ -99,6 +109,11 @@ class BarrelWriter(metaclass=Singleton):
 
 class BarrelReader(metaclass=Singleton):
     def __init__(self, barrel_name=None):
+        """
+        Latest :  indicator if should use latest barrel (csv) or not
+        df : pandas dataframe
+        :param barrel_name: csv file name
+        """
         self.latest = True if not barrel_name else False
         self.barrel_name = barrel_name
         self.df = None
@@ -110,6 +125,11 @@ class BarrelReader(metaclass=Singleton):
         return img_arr
 
     def get_record(self, record_dict):
+        """
+        Returns a record with image instead of image path
+        :param record_dict:
+        :return:
+        """
         record = {}
         for key, value in record_dict.items():
             if key is 'image':
@@ -118,6 +138,11 @@ class BarrelReader(metaclass=Singleton):
         return record
 
     def get_csv(self):
+        """
+        If it asks for latest barrel then get it
+        else custom barrel_name provided (from _init_ parameter) then load it, raise exception if file not exist
+        :return:
+        """
         if self.latest:
             latest_number = count_datasets() + 1
             barrel_full_name = DATA_PATH + '/' + str(latest_number) + '.csv'
@@ -127,9 +152,18 @@ class BarrelReader(metaclass=Singleton):
         raise FileNotFoundError("Barrel path incorrect")
 
     def load_df(self):
+        """
+        Convert csv to pandas
+        :return:
+        """
         self.df = pd.read_csv(self.get_csv())
 
     def generate_record(self, df=None):
+        """
+        read csv records (with images instead of path) and shuffle it
+        :param df: dataframe to use to extract records
+        :return:
+        """
         if not df:
             df = self.df
         while True:
@@ -140,9 +174,20 @@ class BarrelReader(metaclass=Singleton):
                 yield record_dict
 
     def change_barrel(self, name):
+        """
+        if needs to change barrel name anywhere in runtime
+        :param name:
+        :return:
+        """
         self.barrel_name = name
 
     def generate_batch(self, batch_size=128, df=None):
+        """
+        Split dataframe into small chunks of data with the the provided size (For neural network training)
+        :param batch_size: Chunk size
+        :param df: data frame to use
+        :return:
+        """
         records = self.generate_record(df)
         keys = list(self.df.columns)
 
@@ -160,6 +205,14 @@ class BarrelReader(metaclass=Singleton):
             yield batch_arrays
 
     def generate_training(self, X_keys, Y_keys, batch_size=128, df=None):
+        """
+        Return data frame splited as X Y (X input, Y output) and split it to chunks.
+        :param X_keys: input names
+        :param Y_keys: output names
+        :param batch_size: chunks size
+        :param df: data frame to use
+        :return:
+        """
         batches = self.generate_batch(batch_size=batch_size, df=df)
         while True:
             batch = next(batches)
@@ -168,11 +221,19 @@ class BarrelReader(metaclass=Singleton):
             yield X, Y
 
     def generate_training_validation(self, batch_size=128, train_frac=.8):
+        """
+        Acts as the start point for the entire class.
+        split data into training validation sets and process the chunks and records
+        :param batch_size: chunks size
+        :param train_frac: specifies the number of samples to return in random order
+        (.8 means 80% of the data returned in random order)
+        :return:
+        """
         self.load_df()
         X_keys = ['image']
         Y_keys = ['angle', 'throttle']
-        train_df  = self.df.sample(frac=train_frac, random_state=200)
-        val_df = self.df.drop(train_df.index)
+        train_df = self.df.sample(frac=train_frac, random_state=200)  # training set
+        val_df = self.df.drop(train_df.index)  # drop the training set and the rest is validation
 
         train_gen = self.generate_training(X_keys=X_keys, Y_keys=Y_keys, batch_size=batch_size, df=train_df)
 
