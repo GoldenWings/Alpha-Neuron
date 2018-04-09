@@ -52,7 +52,7 @@ class PiCamera(Thread):
             self.byte_frame = self.stream.getvalue()
             self.frame = np.array(Image.open(io.BytesIO(self.byte_frame)))
             if self.status.is_recording:
-                self.barrel_writer.write_csv()
+                self.barrel_writer.save_image(self.frame)
 
             if not self.status.sensor_started:
                 self.__close()
