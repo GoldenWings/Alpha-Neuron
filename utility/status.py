@@ -58,6 +58,6 @@ class Status(metaclass=Singleton):
     def stop_recording(self):
         self.__is_recording = False
 
-    def rest_recording_status(self):
+    def reset_recording_status(self):
         self.__is_recording = False
         self.__is_paused = False
