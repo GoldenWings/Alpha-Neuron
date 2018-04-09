@@ -15,6 +15,7 @@ class PiCamera(Thread):
         # initialize the camera and stream
         self.status = objects.get('status')
         self.agent = objects.get('driving_nn')
+        self.barrel_writer = objects.get('barrelwriter')
         self.resolution = resolution
         self.framerate = framerate
         self.camera = None
@@ -50,20 +51,12 @@ class PiCamera(Thread):
             # preparation for the next frame
             self.byte_frame = self.stream.getvalue()
             self.frame = np.array(Image.open(io.BytesIO(self.byte_frame)))
-            #            self.frame = bytes_to_rgb(self.stream.getvalue(), self.camera.resolution)
             if self.status.is_recording:
-                i = 1
-                dirpath = str(Path(os.path.abspath(os.path.dirname(__file__))).parent.parent)
-                filepath = dirpath + '/Training Data/Images/'
-                while os.path.exists(filepath + 'image_' + "%s.jpg" % i):
-                    i += 1
-                self.img_name = filepath + 'image_' + "%s.jpg" % i
-                cv2.imwrite(self.img_name, self.frame)
-                # if the thread indicator variable is set, stop the thread
-                # and resource camera resources
-                if not self.status.sensor_started:
-                    self.__close()
-                    return
+                self.barrel_writer.write_csv()
+
+            if not self.status.sensor_started:
+                self.__close()
+                return
             elif self.status.is_agent and self.agent is not None:
                 self.agent.put(self.frame)
 
