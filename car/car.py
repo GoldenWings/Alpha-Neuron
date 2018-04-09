@@ -42,6 +42,10 @@ class Car(metaclass=Singleton):
     def turn_left(self):
         self.__objects['servo'].turn_left()
 
+    @property
+    def current_angle(self):
+        return self.__objects['servo'].get_angle()
+
     def move_forward(self):
         self.__objects['motor'].move_forward()
 
@@ -54,8 +58,9 @@ class Car(metaclass=Singleton):
     def dec_speed(self):
         self.__objects['motor'].dec_speed()
 
+    @property
     def current_speed(self):
-        self.__objects['motor'].get_speed()
+        return self.__objects['motor'].get_speed()
 
     def brake(self):
         self.__objects['motor'].brake()
