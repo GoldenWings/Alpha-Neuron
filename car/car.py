@@ -5,11 +5,13 @@ class Car(metaclass=Singleton):
     def __init__(self):
         self.__threaded_objects = None
         self.__objects = None
+        self.__sensor_objects = None
 
     def initialize_objects(self, objects, threaded_objects, sensor_objects):
         self.__threaded_objects = threaded_objects
         self.__objects = {**objects, **threaded_objects}
         self.__sensor_objects = sensor_objects
+        self.__objects = {**self.__objects, **self.__sensor_objects}
         self.start_threads()
 
     @property
