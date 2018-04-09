@@ -5,16 +5,14 @@ import cv2
 
 
 class BarrelWriter(metaclass=Singleton):
-        def __init__(self, objects, current_session=True):
+        def __init__(self, objects, current_session=False):
             '''
             :param objects: contains all objects required for the class
             :param current_session: weather or not to save on the latest csv (Current session is the latest csv)
             '''
             self._car = objects.get('car')
-            self.current_session = False
+            self.current_session = current_session
             self.csv_name = None
-            if current_session:
-                self.current_session = True
 
         def get_csv(self):
             """
