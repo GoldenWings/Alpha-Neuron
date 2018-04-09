@@ -6,6 +6,7 @@ import inspect
 import sys
 
 import utility.status
+import utility.barrel
 import pilot.agent
 from car.car import Car
 from car.controller import config as controller
