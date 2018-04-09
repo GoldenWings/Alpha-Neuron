@@ -13,3 +13,7 @@ class Servo(Pca9685, metaclass=Singleton):
 
     def turn_left(self):
         self.set_angle((self.current_angle - self.step))
+
+    @property
+    def angle(self):
+        return self.current_angle
