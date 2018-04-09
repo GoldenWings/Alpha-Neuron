@@ -80,7 +80,7 @@ class BarrelWriter(metaclass=Singleton):
             :param img: image to be stored from picamera angle and throttle included
             """
             angle = self.servo.angle
-            throttle = self.servo.throttle
+            throttle = self.motor.throttle
             timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
             img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
             full_name = IMAGE_PATH + img_name
