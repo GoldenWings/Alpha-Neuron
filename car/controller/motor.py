@@ -46,7 +46,8 @@ class Motor(Md10c, metaclass=Singleton):
         self.__current_speed -= MOTOR_STEP
         self.set_speed(self.__current_speed)
 
-    def get_speed(self):
+    @property
+    def throttle(self):
         return self.__current_speed
 
     def __del__(self):
