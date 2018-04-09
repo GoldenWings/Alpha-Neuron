@@ -2,6 +2,9 @@ from .singleton import Singleton
 import csv
 from .barrel_config import *
 import cv2
+import pandas as pd
+from PIL import Image
+import numpy as np
 
 
 class BarrelWriter(metaclass=Singleton):
@@ -90,14 +93,84 @@ class BarrelWriter(metaclass=Singleton):
 
 
 class BarrelReader(metaclass=Singleton):
-    def __init__(self):
-        pass
+    def __init__(self, barrel_name=None):
+        self.latest = True if not barrel_name else False
+        self.barrel_name = barrel_name
+        self.df = None
 
-    def get_record(self):
-        pass
+    # noinspection PyMethodMayBeStatic
+    def get_image(self, img_path):
+        img = Image.open(img_path)
+        img_arr = np.array(img)
+        return img_arr
 
-    def get_image(self):
-        pass
+    def get_record(self, record_dict):
+        record = {}
+        for key, value in record_dict.items():
+            if key is 'image':
+                value = self.get_image(value)
+            record[value] = key
+        return record
 
-    def __convert_to_df(self):
-        pass
+    def get_csv(self):
+        if self.latest:
+            latest_number = count_datasets() + 1
+            barrel_full_name = DATA_PATH + '/' + str(latest_number) + '.csv'
+            return barrel_full_name
+        if os.path.isfile(os.path.join(DATA_PATH, self.barrel_name + '.csv')):
+            return DATA_PATH + '/' + self.barrel_name + '.csv'
+        raise FileNotFoundError("Barrel path incorrect")
+
+    def load_df(self):
+        self.df = pd.read_csv(self.get_csv())
+
+    def generate_record(self, df=None):
+        if not df:
+            df = self.df
+        while True:
+            for _ in df.iterrows():
+                record_dict = df.sample(n=1).to_dict(orient='record')[0]
+
+                record_dict = self.get_record(record_dict)
+                yield record_dict
+
+    def change_barrel(self, name):
+        self.barrel_name = name
+
+    def generate_batch(self, batch_size=128, df=None):
+        records = self.generate_record(df)
+        keys = list(self.df.columns)
+
+        while True:
+            record_list = []
+
+            for _ in range(batch_size):
+                record_list.append(next(records))
+            batch_arrays = {}
+
+            for i, k in enumerate(keys):
+                arr = np.array([r[k] for r in record_list])
+                batch_arrays[k] = arr
+
+            yield batch_arrays
+
+    def generate_training(self, X_keys, Y_keys, batch_size=128, df=None):
+        batches = self.generate_batch(batch_size=batch_size, df=df)
+        while True:
+            batch = next(batches)
+            X = [batch[k] for k in X_keys]
+            Y = [batch[k] for k in Y_keys]
+            yield X, Y
+
+    def generate_training_validation(self, batch_size=128, train_frac=.8):
+        self.load_df()
+        X_keys = ['image']
+        Y_keys = ['angle', 'throttle']
+        train_df = train = self.df.sample(frac=train_frac, random_state=200)
+        val_df = self.df.drop(train_df.index)
+
+        train_gen = self.generate_training(X_keys=X_keys, Y_keys=Y_keys, batch_size=batch_size, df=train_df)
+
+        val_gen = self.generate_training(X_keys=X_keys, Y_keys=Y_keys, batch_size=batch_size, df=val_df)
+
+        return train_gen, val_gen
