@@ -7,6 +7,9 @@ from django.http import JsonResponse
 import psutil
 from main import *
 from asyncore import loop
+from django.http import HttpResponseServerError,StreamingHttpResponse, HttpResponse
+from django.views.decorators import gzip
+import asyncio
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
@@ -14,7 +17,6 @@ class TrainerView(LoginRequiredMixin, generic.TemplateView):
 
     def __init__(self):
         super(TrainerView, self).__init__()
-
 
     @receiver(user_logged_out)
     def on_user_logged_out(sender, request, **kwargs):
@@ -29,7 +31,7 @@ def send_command(request):
     if command is None:
         return
     elif command == 'radar':
-        radar = car.ultrasonic.get_frame()
+        radar = list(car.ultrasonic.get_frame().values())
     elif command == 'deactivate':
         car.status.deactivate_trainer()
     elif command == 'usage':
@@ -58,3 +60,18 @@ def stop_recording(request):
     car.status.stop_recording()
     data = {'clicked': 'stop'}
     return JsonResponse(data)
+
+
+def gen():
+    while True:
+        frame = car.camera.byte_frame
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+
+@gzip.gzip_page
+def video(request):
+    try:
+        return StreamingHttpResponse(gen(), content_type="multipart/x-mixed-replace;boundary=frame")
+    except HttpResponseServerError as e:
+        print("aborted")
