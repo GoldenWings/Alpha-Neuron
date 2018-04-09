@@ -7,6 +7,7 @@ class Status(metaclass=Singleton):
         self.__is_recording = False
         self.__is_agent = False
         self.__is_trainer = False
+        self.__is_paused = True
 
     @property
     def is_trainer(self):
@@ -19,6 +20,10 @@ class Status(metaclass=Singleton):
     @property
     def is_recording(self):
         return self.__is_recording
+
+    @property
+    def is_paused(self):
+        return self.__is_paused
 
     @property
     def sensor_started(self):
@@ -41,6 +46,14 @@ class Status(metaclass=Singleton):
 
     def start_recording(self):
         self.__is_recording = True
+
+    def pause_recording(self):
+        self.__is_recording = False
+        self.__is_paused = True
+
+    def continue_recording(self):
+        self.__is_paused = False
+        self.__is_recording  = True
 
     def stop_recording(self):
         self.__is_recording = False
