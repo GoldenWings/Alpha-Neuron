@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.signals import user_logged_out
 from django.dispatch import receiver
 from django.views import generic
+from main import car
 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 granddir = os.path.dirname(os.path.dirname(os.path.abspath(parentdir)))

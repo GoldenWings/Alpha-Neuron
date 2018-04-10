@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views import generic
 from django.views.decorators import gzip
 
-from main import *
+from main import car
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
