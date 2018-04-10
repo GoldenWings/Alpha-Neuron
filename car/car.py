@@ -14,6 +14,7 @@ class Car(metaclass=Singleton):
         self.__sensor_objects = sensor_objects
         self.__objects = {**self.__objects, **self.__sensor_objects}
         self.start_car()
+
     @property
     def status(self):
         return self.__objects['status']
@@ -66,7 +67,7 @@ class Car(metaclass=Singleton):
         self.__objects['motor'].brake()
 
     def start_car(self, status_is_agent=False):
-        if self.__is_started:
+        if not self.__is_started:
             self.start_sensor()
             self.__is_started = True
         if status_is_agent:
