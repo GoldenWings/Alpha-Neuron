@@ -97,10 +97,11 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     print("No session to abort, the agent mode is activated")
                 else:
                     if self.car.status.is_recording or self.car.status.is_paused:
+                        print("Start aborting the session it may take some time")
                         self.car.status.reset_recording_status()
                         self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                         self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
-                        print("abort session")
+                        print("The session has been aborted successfully")
                     else:
                         print("There is no session to abort")
             elif event.code == BTN_SELECT:
