@@ -45,7 +45,6 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 else:
                     if self.car.status.is_recording:
                         self.car.status.pause_recording()
-                        self.car.start_car(True)
                         print("pause recording")
                     else:
                         print("there is no recording to pause")
@@ -58,6 +57,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         print("Unable to change the mode there is on going training session ")
                     else:
                         self.car.status.activate_agent()
+                        self.car.start_car(True)
                         print("activate agent")
             elif event.code == BTN_Y:
                 if self.car.status.is_trainer:
