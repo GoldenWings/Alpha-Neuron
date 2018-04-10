@@ -57,15 +57,14 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         print("Unable to change the mode there is on going training session ")
                     else:
                         self.car.status.activate_agent()
-                        self.car.start_sensor()
-                        self.car.start_threads()
+                        self.car.start_car(True)
                         print("activate agent")
             elif event.code == BTN_Y:
                 if self.car.status.is_trainer:
                     print("The trainer mode is already activated")
                 else:
                     self.car.status.activate_trainer()
-                    self.car.start_sensor()
+                    self.car.start_car()
                     print("activate trainer")
             elif event.code == BTN_TR:
                 if self.car.status.is_trainer:
@@ -106,9 +105,15 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         print("There is no session to abort")
             elif event.code == BTN_SELECT:
                 # logitech Back
-                self.car.status.reset_recording_status()
-                self.barrel_writer.save_csv(self.__start_time)
-                print('save session ')
+                if self.car.status.is_agent:
+                    print("No session to save, the agent mode is activated")
+                else:
+                    if self.car.status.is_recording or self.car.status.is_paused:
+                        self.car.status.reset_recording_status()
+                        self.barrel_writer.save_csv(self.__start_time)
+                        print('save session ')
+                    else:
+                        print("There is no session to save")
         elif event.type == EV_ABS and self.car.status.is_trainer:
 
             if event.value < 0:
