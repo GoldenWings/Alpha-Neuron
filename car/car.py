@@ -74,6 +74,8 @@ class Car(metaclass=Singleton):
             self.start_sensor()
             self.start_threads()
             self.__is_started = True
+        if status_is_agent:
+            self.start_threads()
 
     def train(self):
         train_gen, val_gen = self.barrel_reader.generate_training_validation(cfg.BATCH_SIZE,
