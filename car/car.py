@@ -69,6 +69,7 @@ class Car(metaclass=Singleton):
         self.start_sensor()
         if status_is_agent:
             self.start_threads()
+
     def __del__(self):
         del self.__objects
         del self.__threaded_objects
