@@ -4,7 +4,7 @@ Usage: Loads configuration and acts as starting point of the project
 
 import inspect
 import sys
-import pilot.agent
+
 from car.car import Car
 from car.controller import config as controller
 from car.sensor import config as sensor
