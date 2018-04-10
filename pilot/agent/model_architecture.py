@@ -1,55 +1,41 @@
-import tensorflow as tf
-from pilot.trainer.trainer import Trainer, parse_args
-import os
-from pilot.agent.model_core import *
+from keras.layers import Input, Dense, merge
+from keras.models import Model
+from keras.layers import Convolution2D, MaxPooling2D, Reshape, BatchNormalization
+from keras.layers import Activation, Dropout, Flatten, Dense
 
 
-args = parse_args()
-data_path = args["datapath"]
-epochs = args["epochs"]
-show_speed = args['show_speed']
+def build_model():
+    img_in = Input(shape=(120, 160, 3),
+                   name='img_in')  # First layer, input layer, Shape comes from camera.py resolution, RGB
+    x = img_in
+    x = Convolution2D(24, (5, 5), strides=(2, 2), activation='relu')(
+        x)  # 24 features, 5 pixel x 5 pixel kernel (convolution, feauture) window, 2wx2h stride, relu activation
+    x = Convolution2D(32, (5, 5), strides=(2, 2), activation='relu')(
+        x)  # 32 features, 5px5p kernel window, 2wx2h stride, relu activatiion
+    x = Convolution2D(64, (5, 5), strides=(2, 2), activation='relu')(
+        x)  # 64 features, 5px5p kernal window, 2wx2h stride, relu
+    x = Convolution2D(64, (3, 3), strides=(2, 2), activation='relu')(
+        x)  # 64 features, 3px3p kernal window, 2wx2h stride, relu
+    x = Convolution2D(64, (3, 3), strides=(1, 1), activation='relu')(
+        x)  # 64 features, 3px3p kernal window, 1wx1h stride, relu
 
-sess = tf.InteractiveSession(config=tf.ConfigProto())
+    x = Flatten(name='flattened')(x)  # Flatten to 1D (Fully connected)
+    x = Dense(100, activation='relu')(x)  # Classify the data into 100 features, make all negatives 0
+    x = Dropout(.1)(x)  # Randomly drop out (turn off) 10% of the neurons (Prevent overfitting)
+    x = Dense(50, activation='relu')(x)  # Classify the data into 50 features, make all negatives 0
+    x = Dropout(.1)(x)  # Randomly drop out 10% of the neurons (Prevent overfitting)
+    # categorical output of the angle
+    angle_out = Dense(15, activation='softmax', name='angle_out')(
+        x)  # Connect every input with every output and output 15 hidden units.
+    # Use Softmax to give percentage. 15 categories and find best one based off percentage 0.0-1.0
 
-x = tf.placeholder(tf.float32, shape=[None, 240, 320, 3], name='x')
-y_ = tf.placeholder(tf.float32, shape=[None, 3], name='y_')
-phase = tf.placeholder(tf.bool, name='phase')
+    # continous output of throttle
+    throttle_out = Dense(1, activation='relu', name='throttle_out')(x)  # Reduce to 1 number, Positive number only
 
-conv1 = batch_norm_pool_conv_layer('layer1', x, [6, 6, 3, 24], phase)
-conv2 = batch_norm_conv_layer('layer2',conv1, [6, 6, 24, 24], phase)
-conv3 = batch_norm_pool_conv_layer('layer3',conv2, [6, 6, 24, 36], phase)
-conv4 = batch_norm_conv_layer('layer4',conv3, [6, 6, 36, 36], phase)
-conv5 = batch_norm_pool_conv_layer('layer5',conv4, [6, 6, 36, 48], phase)
-conv6 = batch_norm_conv_layer('layer6',conv5, [6, 6, 48, 64], phase)
-conv7 = batch_norm_pool_conv_layer('layer7',conv6, [6, 6, 64, 64], phase)
+    model = Model(inputs=[img_in], outputs=[angle_out, throttle_out])
+    model.compile(optimizer='adam',
+                  loss={'angle_out': 'categorical_crossentropy',
+                        'throttle_out': 'mean_absolute_error'},
+                  loss_weights={'angle_out': 0.9, 'throttle_out': .001})
 
-h_pool7_flat = tf.reshape(conv7, [-1, 15 * 20 * 64])
-h8 = batch_norm_fc_layer('layer8',h_pool7_flat, [15 * 20 * 64, 512], phase)
-h9 = batch_norm_fc_layer('layer9',h8, [512, 256], phase)
-h10 = batch_norm_fc_layer('layer10',h9, [256, 128], phase)
-h11 = batch_norm_fc_layer('layer11',h10, [128, 64], phase)
-
-W_final = weight_variable('layer12',[64, 3])
-b_final = bias_variable('layer12',[3])
-logits = tf.add(tf.matmul(h11, W_final), b_final, name='logits')
-
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_))
-train_step = tf.train.AdamOptimizer(1e-5,name='train_step').minimize(cross_entropy)
-correct_prediction = tf.equal(tf.argmax(logits,1), tf.argmax(y_,1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32),name='accuracy')
-
-update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-with tf.control_dependencies(update_ops):
-    train_step = tf.train.AdamOptimizer(1e-5).minimize(cross_entropy)
-
-model_file = os.path.dirname(os.path.realpath(__file__)) + '/' + os.path.basename(__file__)
-trainer = Trainer(data_path=data_path,
-                  model_file=model_file,
-                  epochs=epochs,
-                  max_sample_records=100,
-                  show_speed=show_speed)
-trainer.train(sess=sess, x=x, y_=y_,
-              accuracy=accuracy,
-              train_step=train_step,
-              train_feed_dict={'phase:0': True},
-              test_feed_dict={})
+    return model

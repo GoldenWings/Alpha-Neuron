@@ -1,34 +1,24 @@
-import tensorflow as tf
-import os
+import keras
 import queue
 import threading
-import cv2
-from utility.data_util import get_prev_epoch
-import numpy as np
-from utility.data_prep import apply_transformations
+from .model_architecture import build_model
 
 
 class DrivingNeuralNetwork:
-    def __init__(self, objects, checkpoint_dir_path=''):
+    def __init__(self, objects, model=None):
         self.__car = objects.get('car')
-        if checkpoint_dir_path is not '':
-            start_epoch = get_prev_epoch(checkpoint_dir_path)
-            graph_name = 'model-' + str(start_epoch)
-            checkpoint_file_path = os.path.join(checkpoint_dir_path, graph_name)
-            saver = tf.train.import_meta_graph(checkpoint_dir_path + "/" + graph_name + ".meta")
-            self.sess = tf.Session()
-            saver.restore(self.sess, checkpoint_file_path)
-            graph = tf.get_default_graph()
-            self.x = graph.get_tensor_by_name("x:0")
-            make_logits = graph.get_operation_by_name("logits")
-            logits = make_logits.outputs[0]
-            # A tensor representing the model's prediction
-            self.prediction = tf.argmax(logits, 1)
-
+        self.model = model
+        if model:
+            self.model = model
+        else:
+            self.model = build_model()
         self.frame_queue = queue.LifoQueue()
         self.prediction_thread = threading.Thread(name="Prediction thread",
                                                   target=self.predict_from_queue,
                                                   args=())
+
+    def load(self, model_path):
+        self.model = keras.models.load_model(model_path)
 
     def put(self, frame):
         self.frame_queue.put(frame)
@@ -42,19 +32,48 @@ class DrivingNeuralNetwork:
     def predict_from_queue(self):
         while self.__car.status.is_agent:
             frame = self.frame_queue.get()
-            flipped_image = cv2.flip(frame, 1)
-            normalized_images = [frame, flipped_image]
-            normalized_images = np.array(normalized_images)
-            # Normalize for contrast and pixel size
-            normalized_images = apply_transformations(normalized_images)
-            command = self.prediction.eval(feed_dict={self.x: normalized_images}, session=self.sess)[0]
-            if command is "right":
-                self.__car.turn_right()
-            elif command is "left":
-                self.__car.turn_left()
-            elif command is "up":
-                self.__car.move_forward()
+            img_arr = frame.reshape((1,) + frame.shape)
+            angle, throttle = self.model.predict(img_arr)
+            print(angle, throttle)
             self.frame_queue.task_done()
+
+    def train(self, train_gen, val_gen,
+              saved_model_path, epochs=100, steps=100, train_split=0.8,
+              verbose=1, min_delta=.0005, patience=5, use_early_stop=True):
+
+        """
+        train_gen: generator that yields an array of images an array of
+
+        """
+
+        # checkpoint to save model after each epoch
+        save_best = keras.callbacks.ModelCheckpoint(saved_model_path,
+                                                    monitor='val_loss',
+                                                    verbose=verbose,
+                                                    save_best_only=True,
+                                                    mode='min')
+
+        # stop training if the validation error stops improving.
+        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss',
+                                                   min_delta=min_delta,
+                                                   patience=patience,
+                                                   verbose=verbose,
+                                                   mode='auto')
+
+        callbacks_list = [save_best]
+
+        if use_early_stop:
+            callbacks_list.append(early_stop)
+
+        hist = self.model.fit_generator(
+            train_gen,
+            steps_per_epoch=steps,
+            epochs=epochs,
+            verbose=1,
+            validation_data=val_gen,
+            callbacks=callbacks_list,
+            validation_steps=steps * (1.0 - train_split) / train_split)
+        return hist
 
     def obstacle_avoidance(self):
         pass
