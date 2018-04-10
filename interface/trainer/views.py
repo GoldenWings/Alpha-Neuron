@@ -38,8 +38,8 @@ def send_command(request):
         processor = psutil.cpu_percent()
         ram = psutil.virtual_memory().used / psutil.virtual_memory().total*100
     elif command == 'get_data':
-        speed = car.current_speed()
-    speed =car.current_speed()
+        speed = car.current_speed
+    speed =car.current_speed
     data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram}
     return JsonResponse(data)
 
@@ -65,6 +65,8 @@ def stop_recording(request):
 def gen():
     while True:
         frame = car.camera.byte_frame
+        if frame is None:
+            continue
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
