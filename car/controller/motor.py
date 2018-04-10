@@ -7,7 +7,7 @@ class Motor(Md10c, metaclass=Singleton):
 
     def __init__(self):
         super().__init__()
-        self.__current_speed = MOTOR_STEP
+        self.__current_speed = BRAKES
 
     def move_backward(self):
         if self.get_dir():
