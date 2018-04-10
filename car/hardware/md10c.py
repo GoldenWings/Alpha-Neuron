@@ -7,7 +7,7 @@ class Md10c:
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)  # method to setup mode of pin referring scheme
-        # GPIO.setwarnings(False)  # set warning mode off
+        GPIO.setwarnings(False)  # set warning mode off
         self.__md10c_dir_pin = MD10C_DIR_PIN
         self.__md10c_pwm_pin = MD10C_PWM_PIN
         self.__md10c_freq = MD10C_FREQ
