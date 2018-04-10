@@ -1,7 +1,7 @@
 import os
 
-DATA_PATH = '/Training Data/'
-IMAGE_PATH = '/Training Data/Images/'
+DATA_PATH = '/home/pi/Development/Alpha-Neuron/Training Data/'
+IMAGE_PATH = '/home/pi/Development/Alpha-Neuron/Training Data/Images/'
 
 
 def count_datasets():

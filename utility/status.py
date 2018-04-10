@@ -35,6 +35,7 @@ class Status(metaclass=Singleton):
 
     def activate_trainer(self):
         self.deactivate_agent()
+        self.reset_recording_status()
         self.__is_trainer = True
 
     def deactivate_agent(self):

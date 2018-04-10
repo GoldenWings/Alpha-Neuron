@@ -38,10 +38,11 @@ class BarrelWriter(metaclass=Singleton):
             then for each image split its name and write the content of the name to a dictionary
             then write it to record
             """
+            start_time = datetime.strptime(start_time,  '%Y-%m-%d %H:%M:%S.%f')
             timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
             self.csv_name = 'session_' + timestamp + '.csv'
             headers = {'angle', 'throttle', 'image'}
-            with open(self.csv_name, 'a') as f:
+            with open(DATA_PATH + self.csv_name, 'a') as f:
                 w = csv.DictWriter(f, headers)
                 w.writeheader()
                 for name in os.listdir(IMAGE_PATH):
@@ -49,11 +50,11 @@ class BarrelWriter(metaclass=Singleton):
                         if os.path.splitext(name)[1] == '.jpg':
                             full_name = name.split('_')
                             full_date = name.split(' ')
-                            date = full_date[0]
+                            date = full_date[0].split('_')[1]
                             time = full_date[1].split('_')[0]
                             image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
-                            throttle = full_name[2]
-                            angle = full_name[4].split('.')[0]
+                            throttle = full_name[3]
+                            angle = full_name[5].split('.')[0]
                             record = self.get_record(throttle, angle, name)
                             if image_date >= start_time:
                                 w.writerow(record)
@@ -73,7 +74,7 @@ class BarrelWriter(metaclass=Singleton):
                 if os.path.isfile(os.path.join(IMAGE_PATH, name)):
                     if os.path.splitext(name)[1] == '.jpg':
                         full_date = name.split(' ')
-                        date = full_date[0]
+                        date = full_date[0].split('_')[1]
                         time = full_date[1].split('_')[0]
                         image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
                         if start_time <= image_date <= end_time:
@@ -88,7 +89,8 @@ class BarrelWriter(metaclass=Singleton):
             throttle = self.motor.throttle
             timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
             img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
-            full_name = IMAGE_PATH + img_name
+            full_name = os.path.expanduser(IMAGE_PATH + img_name)
+
             cv2.imwrite(full_name, img)
 
 

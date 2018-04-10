@@ -4,9 +4,6 @@ Usage: Loads configuration and acts as starting point of the project
 
 import inspect
 import sys
-
-import utility.status
-import utility.barrel
 import pilot.agent
 from car.car import Car
 from car.controller import config as controller
@@ -39,6 +36,7 @@ non_p_objects['car'] = car
 # Initialize utility module objects
 for name, obj in inspect.getmembers(sys.modules['utility']):
         if inspect.isclass(obj) and name in utility_config.modules and utility_config.modules[name].is_active:
+            print(name)
             if utility_config.modules[name].parameterized:
                 # append to parameterized objects dictionary for later Initialization
                 parameterized_objects[name] = [obj, utility_config.modules[name].parameters,
@@ -49,6 +47,7 @@ for name, obj in inspect.getmembers(sys.modules['utility']):
                 else:
                     non_tp_objects[name] = obj()  # Initialize object and append to non threaded non parameterized
         elif name in utility_config.modules and inspect.ismodule(obj) and utility_config.modules[name].is_active:
+            print(name)
             obj = getattr(obj, utility_config.modules[name].class_name)
             if utility_config.modules[name].parameterized:
                 # append to parameterized objects dictionary for later Initialization
