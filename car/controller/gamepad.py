@@ -9,13 +9,13 @@
 #     btn_back save session
 #     btn_logitech abort session
 import threading
+from datetime import datetime
 
 from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL, BTN_START, BTN_SELECT, BTN_MODE
 
 from car.hardware.config import ABS_Yaxis, ABs_Xaxis
 from car.hardware.f710 import F710
 from utility.singleton import Singleton
-from datetime import datetime
 
 
 class Gamepad(F710, threading.Thread, metaclass=Singleton):
@@ -94,10 +94,13 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                             print('start recording')
             elif event.code == BTN_MODE:
                 # logitech main BTN
-                self.car.status.reset_recording_status()
-                self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
-                print("abort session")
+                if self.car.status.is_recording:
+                    self.car.status.reset_recording_status()
+                    self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                    self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
+                    print("abort session")
+                else:
+                    print("There is no session to abort")
             elif event.code == BTN_SELECT:
                 # logitech Back
                 self.car.status.reset_recording_status()
