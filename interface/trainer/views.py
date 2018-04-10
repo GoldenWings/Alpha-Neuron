@@ -1,15 +1,14 @@
+import psutil
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.signals import user_logged_out
 from django.dispatch import receiver
-from django.views import generic
+from django.http import HttpResponseServerError, StreamingHttpResponse
 from django.http import JsonResponse
-import psutil
-from main import *
-from asyncore import loop
-from django.http import HttpResponseServerError,StreamingHttpResponse, HttpResponse
+from django.views import generic
 from django.views.decorators import gzip
-import asyncio
+
+from main import *
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
