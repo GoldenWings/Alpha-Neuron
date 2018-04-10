@@ -65,6 +65,11 @@ class Car(metaclass=Singleton):
     def brake(self):
         self.__objects['motor'].brake()
 
+    def start_car(self, status_is_agent=False):
+        self.start_sensor()
+        if status_is_agent:
+            self.start_threads()
+
     def __del__(self):
         del self.__objects
         del self.__threaded_objects
