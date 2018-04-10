@@ -6,14 +6,14 @@ class Car(metaclass=Singleton):
         self.__threaded_objects = None
         self.__objects = None
         self.__sensor_objects = None
+        self.__is_started = False
 
     def initialize_objects(self, objects, threaded_objects, sensor_objects):
         self.__threaded_objects = threaded_objects
         self.__objects = {**objects, **threaded_objects}
         self.__sensor_objects = sensor_objects
         self.__objects = {**self.__objects, **self.__sensor_objects}
-        self.start_threads()
-
+        self.start_car()
     @property
     def status(self):
         return self.__objects['status']
@@ -66,7 +66,9 @@ class Car(metaclass=Singleton):
         self.__objects['motor'].brake()
 
     def start_car(self, status_is_agent=False):
-        self.start_sensor()
+        if self.__is_started:
+            self.start_sensor()
+            self.__is_started = True
         if status_is_agent:
             self.start_threads()
 
