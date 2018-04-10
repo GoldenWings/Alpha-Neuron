@@ -94,13 +94,16 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                             print('start recording')
             elif event.code == BTN_MODE:
                 # logitech main BTN
-                if self.car.status.is_recording:
-                    self.car.status.reset_recording_status()
-                    self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                    self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
-                    print("abort session")
+                if self.car.status.is_agent:
+                    print("No session to abort, the agent mode is activated")
                 else:
-                    print("There is no session to abort")
+                    if self.car.status.is_recording or self.car.status.is_paused:
+                        self.car.status.reset_recording_status()
+                        self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                        self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
+                        print("abort session")
+                    else:
+                        print("There is no session to abort")
             elif event.code == BTN_SELECT:
                 # logitech Back
                 self.car.status.reset_recording_status()
