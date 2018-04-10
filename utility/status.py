@@ -6,7 +6,7 @@ class Status(metaclass=Singleton):
         super().__init__()
         self.__is_recording = False
         self.__is_agent = False
-        self.__is_trainer = False
+        self.__is_trainer = True
         self.__is_paused = False
 
     @property
