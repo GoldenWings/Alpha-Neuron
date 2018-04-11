@@ -1,5 +1,4 @@
 import Adafruit_PCA9685
-import time
 
 from car.hardware.config import SERVO_MIN_PULSE, SERVO_MAX_PULSE, SERVO_MAX_ANGLE, SERVO_MIN_ANGLE, SERVO_ZERO_POS, \
     SERVO_CHANEL
@@ -17,7 +16,7 @@ class Pca9685:
         self.set_angle(self.zero_pos)
         self.pwm.set_pwm_freq(60)
 
-    def __set_angle(self, channel, delta=170):
+    def _set_angle(self, channel, delta=170):
 #        delay = max(delta * 0.02, 0.02)
         zero_pulse = (self.servo_min + self.servo_max) / 2
         pulse_width = zero_pulse - self.servo_min
@@ -33,7 +32,7 @@ class Pca9685:
             req_angle = self.max
         print(req_angle)
         self.current_angle = req_angle
-        self.__set_angle(SERVO_CHANEL)
+        self._set_angle(SERVO_CHANEL)
 
     def get_angle(self):
         return self.current_angle
