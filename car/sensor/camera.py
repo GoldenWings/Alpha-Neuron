@@ -1,12 +1,10 @@
-import os
-from pathlib import Path
-from threading import Thread
-import cv2
-import picamera
-from picamera.array import PiRGBArray, bytes_to_rgb
 import io
+from threading import Thread
+
 import numpy as np
+import picamera
 from PIL import Image
+from picamera.array import PiRGBArray
 
 
 class PiCamera(Thread):
@@ -30,7 +28,7 @@ class PiCamera(Thread):
 
     def initialize_sensor(self):
         if self.camera is not None:
-            self.__close()
+            self._close()
         self.camera = picamera.PiCamera()
         self.camera.resolution = self.resolution
         self.camera.framerate = self.framerate
@@ -55,7 +53,7 @@ class PiCamera(Thread):
                 self.barrel_writer.save_image(self.frame)
 
             if not self.status.sensor_started:
-                self.__close()
+                self._close()
                 return
             elif self.status.is_agent and self.agent is not None:
                 self.agent.put(self.frame)
@@ -64,7 +62,7 @@ class PiCamera(Thread):
             self.stream.truncate()
 #            self.rawCapture.truncate(0)
 
-    def __close(self):
+    def _close(self):
         self.stream.close()
         self.rawCapture.close()
         self.camera.close()
