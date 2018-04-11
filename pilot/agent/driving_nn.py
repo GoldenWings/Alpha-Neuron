@@ -8,8 +8,8 @@ from .model_architecture import build_model
 
 class DrivingNeuralNetwork:
     def __init__(self, objects, model=None):
-        self.__car = objects.get('car')
-        self.logger = objects.get('logger')
+        self._car = objects.get('car')
+        self._logger = objects.get('logger')
         self.model = model
         if model:
             self.model = model
@@ -33,12 +33,12 @@ class DrivingNeuralNetwork:
         self.prediction_thread.start()
 
     def predict_from_queue(self):
-        while self.__car.status.is_agent:
+        while self._car.status.is_agent:
             frame = self.frame_queue.get()
             img_arr = frame.reshape((1,) + frame.shape)
             angle, throttle = self.model.predict(img_arr)
             prediction = "steering angle = {} throttle = {}".format(angle, throttle)
-            self.logger.log(prediction)
+            self._logger.log(prediction)
             self.frame_queue.task_done()
 
     def train(self, train_gen, val_gen,
