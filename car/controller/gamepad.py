@@ -34,6 +34,11 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
         self._end_time = None
 
     def categorize(self, event):
+        """
+        This function take an event to categorize it, and do whatever that event represent.
+        :param event: is a evdev event.
+        :return: it has no return value
+        """
         if event.type == EV_KEY:
             if event.value == 0:
                 return
