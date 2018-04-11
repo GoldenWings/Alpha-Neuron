@@ -27,6 +27,10 @@ class PiCamera(Thread):
         self.byte_frame = None
 
     def initialize_sensor(self):
+        """
+        this method is responsible for initialize the camera sensor using Picamera class
+        :return: it has no return type
+        """
         if self.camera is not None:
             self._close()
         self.camera = picamera.PiCamera()
@@ -38,10 +42,14 @@ class PiCamera(Thread):
                                                      format="jpeg", use_video_port=True)
 
     def read(self):
-            # return the frame most recently read
+        """
+        return the frame most recently read
+        :return: img_name
+        """
             return self.img_name
 
     def run(self):
+        """this method get image frame from camera and save it using barrel_writer"""
         # keep looping infinitely until the thread is stopped
         i = 0
         for f in self.continuous_stream:
@@ -63,6 +71,7 @@ class PiCamera(Thread):
 #            self.rawCapture.truncate(0)
 
     def _close(self):
+        """this method close all on going stream and will destroy the camera obj to avoid resources conflict"""
         self.stream.close()
         self.rawCapture.close()
         self.camera.close()
