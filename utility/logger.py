@@ -1,43 +1,44 @@
 from .singleton import Singleton
 from datetime import datetime
+import queue
+from utility.status import Status
 
 
 class Logger(metaclass=Singleton):
     LOG_PATH = '/home/pi/Development/Alpha-Neuron/utility/logs/'
 
-    def __init__(self, agent, trainer, training, everything=True, interface=True):
+    def __init__(self, which, everything=True):
         self._session_name = 'others.log'
+        self.status = Status()
         if not everything:
-            if agent is None or trainer is None or training is None:
-                raise ValueError("Not logging Every thing and you didn't specify what to log.")
-            self.agent = agent
-            self.trainer = trainer
-            self.training = training
+            self.agent = which.get('agent') if which.get('agent') else False
+            self.trainer = which.get('agent') if which.get('agent') else False
             self.everything = everything
-            self.interface = interface
+            self.interface = which.get('agent') if which.get('agent') else False
+            if not (self.agent and self.trainer and self.interface):
+                raise ValueError("Not logging Every thing and you didn't specify what to log.")
         else:
             self.agent = True
             self.trainer = True
-            self.training = True
             self.everything = everything
-            self.interface = True
-        if not (agent and trainer and training):
             self._session_start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
             self._session_name = self._session_start_time + '.log'
-        if interface:
-            self.interface_msg = []
+            self.interface_msgs = queue.LifoQueue()
 
-    def log(self, msg, log_type=0):
+    def log(self, msg, error_type=None):
         """
         :param msg: message to be logged
-        :param log_type: type of log message (normal: 0, warning: 1, error: 2)
+        :param error_type: type of log message __name__ of module happened
         :return:
         """
-        msg_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+        if self.status.is_trainer is not self.trainer or self.status.is_agent is not self.agent:
+            return
+        msg_date = datetime.now().strftime('%H:%M')
         with open(Logger.LOG_PATH + self._session_name, 'a') as f:
-            if log_type == 0:
-                f.write("{} {}\n".format(msg_date, msg))
-            elif log_type == 1:
-                f.write("##WARNING##")
-                f.write("{} {}\n".format(msg_date, msg))
-                f.write("##WARNING##")
+            if error_type:
+                formatted_msg = "@@{}\n{}\t{}".format(error_type, msg_date, msg)
+                f.write(formatted_msg)
+            else:
+                formatted_msg = "{}\t{}".format(msg_date, msg)
+                f.write(formatted_msg)
+            self.interface_msgs.put(bytes(formatted_msg, 'utf-8'))
