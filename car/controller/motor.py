@@ -68,7 +68,7 @@ class Motor(Md10c, metaclass=Singleton):
     def throttle(self):
         """
         This function return the motor current speed.
-        :return: current speed
+        :return: current speed ex:0.25
         """
         return self._current_speed
 

@@ -9,11 +9,17 @@ class Servo(Pca9685, metaclass=Singleton):
         self.step = SERVO_STEP
 
     def turn_right(self):
+        """This method turn the car servo angel to the right by value of step."""
         self.set_angle((self.current_angle + self.step))
 
     def turn_left(self):
+        """This method turn the car servo angel to the left by value of step."""
         self.set_angle((self.current_angle - self.step))
 
     @property
     def angle(self):
+        """
+        This property return the car servo current angle
+        :return: the servo ange ex:45
+        """
         return self.current_angle
