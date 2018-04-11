@@ -17,15 +17,24 @@ class Pca9685:
         self.pwm.set_pwm_freq(60)
 
     def _set_angle(self, channel, delta=170):
-#        delay = max(delta * 0.02, 0.02)
+        """
+        This method take the channel that servo is connected to in pca9685 board to send to it the
+        pulse the represent the required angle
+        :return: it has no return type
+        """
+        # delay = max(delta * 0.02, 0.02)
         zero_pulse = (self.servo_min + self.servo_max) / 2
         pulse_width = zero_pulse - self.servo_min
         pulse = zero_pulse + (pulse_width * self.current_angle / 80)
-#        print("angle=%s pulse=%s" % (self.current_angle, pulse))
         self.pwm.set_pwm(channel, 0, int(pulse))
-#        time.sleep(delay)  # sleep to give the servo time to do its thing
+        # time.sleep(delay)
 
     def set_angle(self, req_angle):
+        """
+        This method take the angel that needed to be set to the servo to set it
+        :param req_angle: the angle that needed to be set
+        :return: it has no return type
+        """
         if req_angle <= self.min:
             req_angle = self.min
         elif req_angle >= self.max:
@@ -35,4 +44,8 @@ class Pca9685:
         self._set_angle(SERVO_CHANEL)
 
     def get_angle(self):
+        """
+        This method return the servo angle
+        :return: servo angle ex:20
+        """
         return self.current_angle
