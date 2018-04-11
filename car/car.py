@@ -96,11 +96,11 @@ class Car(metaclass=Singleton):
         return self._objects['motor'].throttle
 
     def brake(self):
-        """This method is used to stop the car or by other meean this is the breaks """
+        """This method is used to stop the car or by other mean this is the breaks """
         self._objects['motor'].brake()
 
     def start_car(self, status_is_agent=False):
-        """This is the method that start the car by starting the car sensor and threads """
+        """This is the method that start the car by starting the car sensors and threads """
         if not self._is_started:
             self.start_sensor()
             self.start_threads()
@@ -109,7 +109,12 @@ class Car(metaclass=Singleton):
             self.start_threads()
 
     def train(self):
-        """This method is responsible for  """
+        """
+            This method is responsible for reading (latest or a given data barrel)
+            then it split the data into training and validation sets according to batch size and split rate
+            Then loads a model and fit it with the generated data set.
+            Finally store it to disk for later use.
+         """
         train_gen, val_gen = self.barrel_reader.generate_training_validation(cfg.BATCH_SIZE,
                                                                              cfg.TRAIN_TEST_SPLIT)
         model_name = 'model_ ' + str(cfg.count_models() + 1)
