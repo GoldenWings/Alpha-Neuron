@@ -1,12 +1,15 @@
-import keras
 import queue
 import threading
+
+import keras
+
 from .model_architecture import build_model
 
 
 class DrivingNeuralNetwork:
     def __init__(self, objects, model=None):
         self.__car = objects.get('car')
+        self.logger = objects.get('logger')
         self.model = model
         if model:
             self.model = model
@@ -34,7 +37,8 @@ class DrivingNeuralNetwork:
             frame = self.frame_queue.get()
             img_arr = frame.reshape((1,) + frame.shape)
             angle, throttle = self.model.predict(img_arr)
-            print(angle, throttle)
+            prediction = "steering angle = {} throttle = {}".format(angle, throttle)
+            self.logger.log(prediction)
             self.frame_queue.task_done()
 
     def train(self, train_gen, val_gen,
