@@ -75,7 +75,7 @@ class Main(metaclass=Singleton):
 
     def initialize_utility(self):
         for name, obj in inspect.getmembers(sys.modules['utility']):
-            if inspect.isclass(obj) and name in self.utility_config.modules and\
+            if inspect.isclass(obj) and name in self.utility_config.modules and \
                     self.utility_config.modules[name].is_active:
                 if self.utility_config.modules[name].parameterized:
                     # append to parameterized objects dictionary for later Initialization
@@ -87,7 +87,8 @@ class Main(metaclass=Singleton):
                     else:
                         # Initialize object and append to non threaded non parameterized
                         self.non_tp_objects[name] = obj()
-            elif name in self.utility_config.modules and inspect.ismodule(obj) and self.utility_config.modules[name].is_active:
+            elif name in self.utility_config.modules and inspect.ismodule(obj) and self.utility_config.modules[
+                name].is_active:
                 print(name)
                 obj = getattr(obj, self.utility_config.modules[name].class_name)
                 if self.utility_config.modules[name].parameterized:
@@ -103,87 +104,88 @@ class Main(metaclass=Singleton):
 
     def initialize_controller(self):
         for name, obj in inspect.getmembers(sys.modules['car.controller']):
-                if inspect.isclass(obj) and name in self.controller_config.modules \
-                        and self.controller_config.modules[name].is_active:
-                    if self.controller_config.modules[name].parameterized:
-                        # append to parameterized objects dictionary for later Initialization
-                        self.parameterized_objects[name] = [obj, self.controller_config.modules[name].parameters,
-                                                            self.controller_config.modules[name].threaded]
+            if inspect.isclass(obj) and name in self.controller_config.modules \
+                    and self.controller_config.modules[name].is_active:
+                if self.controller_config.modules[name].parameterized:
+                    # append to parameterized objects dictionary for later Initialization
+                    self.parameterized_objects[name] = [obj, self.controller_config.modules[name].parameters,
+                                                        self.controller_config.modules[name].threaded]
+                else:
+                    if self.controller_config.modules[name].threaded:
+                        # Initialize object and append to threaded non parameterized
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.controller_config.modules[name].threaded:
-                            # Initialize object and append to threaded non parameterized
-                            self.non_p_objects[name] = obj()
-                        else:
-                            # Initialize object and append to non threaded non parameterized
-                            self.non_tp_objects[name] = obj()
-                elif name in self.controller_config.modules and inspect.ismodule(obj) and self.controller_config.modules[name].is_active:
-                    obj = getattr(obj, self.controller_config.modules[name].class_name)
-                    if self.controller_config.modules[name].parameterized:
-                        # append to parameterized objects dictionary for later Initialization
-                        self.parameterized_objects[name] = [obj, self.controller_config.modules[name].parameters,
-                                                            self.controller_config.modules[name].threaded]
+                        # Initialize object and append to non threaded non parameterized
+                        self.non_tp_objects[name] = obj()
+            elif name in self.controller_config.modules and inspect.ismodule(obj) and self.controller_config.modules[
+                name].is_active:
+                obj = getattr(obj, self.controller_config.modules[name].class_name)
+                if self.controller_config.modules[name].parameterized:
+                    # append to parameterized objects dictionary for later Initialization
+                    self.parameterized_objects[name] = [obj, self.controller_config.modules[name].parameters,
+                                                        self.controller_config.modules[name].threaded]
+                else:
+                    if self.controller_config.modules[name].threaded:
+                        # Initialize object and append to threaded non parameterized
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.controller_config.modules[name].threaded:
-                            # Initialize object and append to threaded non parameterized
-                            self.non_p_objects[name] = obj()
-                        else:
-                            self.non_tp_objects[name] = obj()
+                        self.non_tp_objects[name] = obj()
 
     def initialize_sensor(self):
         for name, obj in inspect.getmembers(sys.modules['car.sensor']):
-                if inspect.isclass(obj) and name in self.sensor_config.modules \
-                        and self.sensor_config.modules[name].is_active:
-                    if self.sensor_config.modules[name].parameterized:
-                        # append to parameterized objects list for later Initialization
-                        self.parameterized_objects[name] = [obj, self.sensor_config.modules[name].parameters,
-                                                       self.sensor_config.modules[name].threaded]
+            if inspect.isclass(obj) and name in self.sensor_config.modules \
+                    and self.sensor_config.modules[name].is_active:
+                if self.sensor_config.modules[name].parameterized:
+                    # append to parameterized objects list for later Initialization
+                    self.parameterized_objects[name] = [obj, self.sensor_config.modules[name].parameters,
+                                                        self.sensor_config.modules[name].threaded]
+                else:
+                    if self.sensor_config.modules[name].threaded:
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.sensor_config.modules[name].threaded:
-                            self.non_p_objects[name] = obj()
-                        else:
-                            self.non_tp_objects[name] = obj()  # Initialize object and append
-                elif name in self.sensor_config.modules and inspect.ismodule(obj) \
-                        and self.sensor_config.modules[name].is_active:
-                    obj = getattr(obj, self.sensor_config.modules[name].class_name)
-                    if self.sensor_config.modules[name].parameterized:
-                        # append to parameterized objects dictionary for later Initialization
-                        self.parameterized_objects[name] = [obj, self.sensor_config.modules[name].parameters,
-                                                            self.sensor_config.modules[name].threaded]
+                        self.non_tp_objects[name] = obj()  # Initialize object and append
+            elif name in self.sensor_config.modules and inspect.ismodule(obj) \
+                    and self.sensor_config.modules[name].is_active:
+                obj = getattr(obj, self.sensor_config.modules[name].class_name)
+                if self.sensor_config.modules[name].parameterized:
+                    # append to parameterized objects dictionary for later Initialization
+                    self.parameterized_objects[name] = [obj, self.sensor_config.modules[name].parameters,
+                                                        self.sensor_config.modules[name].threaded]
+                else:
+                    if self.sensor_config.modules[name].threaded:
+                        # Initialize object and append to threaded non parameterized
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.sensor_config.modules[name].threaded:
-                            # Initialize object and append to threaded non parameterized
-                            self.non_p_objects[name] = obj()
-                        else:
-                            self.non_tp_objects[name] = obj()  #
+                        self.non_tp_objects[name] = obj()  #
 
     def initialize_pilot(self):
         for name, obj in inspect.getmembers(sys.modules['pilot.agent']):
-                if inspect.isclass(obj) and name in self.pilot_config.modules \
-                        and self.pilot_config.modules[name].is_active:
-                    if self.pilot_config.modules[name].parameterized:
-                        # append to parameterized objects list for later Initialization
-                        self.parameterized_objects[name] = [obj, self.pilot_config.modules[name].parameters,
-                                                            self.pilot_config.modules[name].threaded]
+            if inspect.isclass(obj) and name in self.pilot_config.modules \
+                    and self.pilot_config.modules[name].is_active:
+                if self.pilot_config.modules[name].parameterized:
+                    # append to parameterized objects list for later Initialization
+                    self.parameterized_objects[name] = [obj, self.pilot_config.modules[name].parameters,
+                                                        self.pilot_config.modules[name].threaded]
+                else:
+                    if self.pilot_config.modules[name].threaded:
+                        # Initialize object and append to threaded non parameterized
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.pilot_config.modules[name].threaded:
-                            # Initialize object and append to threaded non parameterized
-                            self.non_p_objects[name] = obj()
-                        else:
-                            # Initialize object and append to non threaded non parameterized
-                            self.non_tp_objects[name] = obj()
-                elif name in self.pilot_config.modules and inspect.ismodule(obj) \
-                        and self.pilot_config.modules[name].is_active:
-                    obj = getattr(obj, self.pilot_config.modules[name].class_name)
-                    if self.pilot_config.modules[name].parameterized:
-                        # append to parameterized objects dictionary for later Initialization
-                        self.parameterized_objects[name] = [obj, self.pilot_config.modules[name].parameters,
-                                                            self.pilot_config.modules[name].threaded]
+                        # Initialize object and append to non threaded non parameterized
+                        self.non_tp_objects[name] = obj()
+            elif name in self.pilot_config.modules and inspect.ismodule(obj) \
+                    and self.pilot_config.modules[name].is_active:
+                obj = getattr(obj, self.pilot_config.modules[name].class_name)
+                if self.pilot_config.modules[name].parameterized:
+                    # append to parameterized objects dictionary for later Initialization
+                    self.parameterized_objects[name] = [obj, self.pilot_config.modules[name].parameters,
+                                                        self.pilot_config.modules[name].threaded]
+                else:
+                    if self.pilot_config.modules[name].threaded:
+                        # Initialize object and append to threaded non parameterized
+                        self.non_p_objects[name] = obj()
                     else:
-                        if self.pilot_config.modules[name].threaded:
-                            # Initialize object and append to threaded non parameterized
-                            self.non_p_objects[name] = obj()
-                        else:
-                            self.non_tp_objects[name] = obj()
+                        self.non_tp_objects[name] = obj()
 
     def get_parameters(self, parameterized_object):
         p_param = {}  # dictionary of parameters to be passed to the object
@@ -205,8 +207,8 @@ class Main(metaclass=Singleton):
 
 
 if __name__ == "__main__":
-    try :
+    try:
         main = Main()
         main.car.train()
-    except Exception as erro:
+    except Exception as error:
         pass
