@@ -217,5 +217,6 @@ if __name__ == "__main__":
         main = Main()
         main.car.train()
     except Exception as error:
-        trace = traceback.print_exc()
-        Main.logger.log(error, trace)
+        trace = traceback.format_exc()
+        mssg = '{}\n{}'.format(trace, str(error))
+        Main.logger.log(mssg, type(error).__name__)
