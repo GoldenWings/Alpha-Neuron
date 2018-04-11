@@ -1,7 +1,8 @@
-from .singleton import Singleton
-from datetime import datetime
 import queue
+from datetime import datetime
+
 from utility.status import Status
+from .singleton import Singleton
 
 
 class Logger(metaclass=Singleton):
@@ -36,7 +37,7 @@ class Logger(metaclass=Singleton):
         msg_date = datetime.now().strftime('%H:%M')
         with open(Logger.LOG_PATH + self._session_name, 'a') as f:
             if error_type:
-                formatted_msg = "@@{}\n{}\t{}".format(error_type, msg_date, msg)
+                formatted_msg = "@@{}\t{}\n{}".format(error_type, msg_date, msg)
                 f.write(formatted_msg)
             else:
                 formatted_msg = "##'\n'{}\t{}".format(msg_date, msg)
