@@ -7,8 +7,8 @@ from django.http import HttpResponseServerError, StreamingHttpResponse
 from django.http import JsonResponse
 from django.views import generic
 from django.views.decorators import gzip
-
-from main import car
+from main import Main as Access
+Main = Access()
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
@@ -27,43 +27,24 @@ def send_command(request):
     processor = 0
     ram = 0
     command = request.GET.get('command', None)
+    print(command)
     if command is None:
         return
     elif command == 'radar':
-        radar = list(car.ultrasonic.get_frame().values())
-    elif command == 'deactivate':
-        car.status.deactivate_trainer()
+        radar = list(Main.car.ultrasonic.get_frame().values())
     elif command == 'usage':
         processor = psutil.cpu_percent()
         ram = psutil.virtual_memory().used / psutil.virtual_memory().total*100
     elif command == 'get_data':
-        speed = car.current_speed
-    speed =car.current_speed
+        speed = Main.car.current_speed
+    speed =Main.car.current_speed
     data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram}
-    return JsonResponse(data)
-
-
-def start_recording(request):
-    car.status.start_recording()
-    data = {'clicked': 'start'}
-    return JsonResponse(data)
-
-
-def pause_recording(request):
-    car.status.stop_recording()
-    data = {'clicked': 'pause'}
-    return JsonResponse(data)
-
-
-def stop_recording(request):
-    car.status.stop_recording()
-    data = {'clicked': 'stop'}
     return JsonResponse(data)
 
 
 def gen():
     while True:
-        frame = car.camera.byte_frame
+        frame = Main.car.camera.byte_frame
         if frame is None:
             continue
         yield (b'--frame\r\n'
@@ -76,3 +57,7 @@ def video(request):
         return StreamingHttpResponse(gen(), content_type="multipart/x-mixed-replace;boundary=frame")
     except HttpResponseServerError as e:
         print("aborted")
+
+
+def train(request):
+    Main.car.train()

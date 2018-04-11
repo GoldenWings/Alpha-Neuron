@@ -97,7 +97,7 @@ class Car(metaclass=Singleton):
 
     @property
     def barrel_reader(self):
-        return self.__objects['barrel_reader']
+        return self.__objects['barrelreader']
 
     @property
     def driving_nn(self):

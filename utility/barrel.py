@@ -132,11 +132,11 @@ class BarrelReader(metaclass=Singleton):
         :return:
         """
         if self.latest:
-            latest_number = count_datasets() + 1
-            barrel_full_name = DATA_PATH + '/' + str(latest_number) + '.csv'
+            latest_csv_name = get_latest_csv()
+            barrel_full_name = DATA_PATH + str(latest_csv_name) + '.csv'
             return barrel_full_name
         if os.path.isfile(os.path.join(DATA_PATH, self.barrel_name + '.csv')):
-            return DATA_PATH + '/' + self.barrel_name + '.csv'
+            return DATA_PATH + self.barrel_name + '.csv'
         raise FileNotFoundError("Barrel path incorrect")
 
     def load_df(self):

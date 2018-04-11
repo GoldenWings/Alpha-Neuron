@@ -84,7 +84,6 @@
                         {% endif %}</p>
                 </div>
             </div>
-
             <!-- sidebar menu: : style can be found in sidebar.less -->
             <ul class="sidebar-menu" data-widget="tree">
                 <li class="header">MAIN NAVIGATION</li>
@@ -97,6 +96,12 @@
                     <a href="{% url 'Trainer:Trainer' %}">
                         <i class="fa fa-automobile"></i>
                         <span>Trainer</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'Trainer:Train' %}">
+                        <i class="fa fa-graduation-cap"></i>
+                        <span>Train a model</span>
                     </a>
                 </li>
             </ul>

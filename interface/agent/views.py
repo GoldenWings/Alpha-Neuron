@@ -4,14 +4,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.signals import user_logged_out
 from django.dispatch import receiver
 from django.views import generic
-from main import car
-
-parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-granddir = os.path.dirname(os.path.dirname(os.path.abspath(parentdir)))
-os.sys.path.insert(0, granddir)
-
-
-# from drive import Drive
+from main import Main as Access
+from django.views.decorators import gzip
+from django.http import HttpResponseServerError, StreamingHttpResponse
+Main = Access()
 
 
 class AgentView(LoginRequiredMixin, generic.TemplateView):
@@ -19,8 +15,30 @@ class AgentView(LoginRequiredMixin, generic.TemplateView):
 
     def __init__(self):
         super(AgentView, self).__init__()
-        # self.dive = Drive()
 
     @receiver(user_logged_out)
     def on_user_logged_out(sender, request, **kwargs):
         messages.add_message(request, messages.INFO, 'Logged out.')
+
+
+def gen(is_rest):
+    while not is_rest:
+        frame = Main.car.camera.byte_frame
+        if frame is None:
+            print('now')
+            continue
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+    http_rest = False
+
+
+http_rest = True
+
+
+@gzip.gzip_page
+def video(request):
+    try:
+        is_rest = not http_rest
+        return StreamingHttpResponse(gen(is_rest), content_type="multipart/x-mixed-replace;boundary=frame")
+    except HttpResponseServerError as e:
+        print("aborted")
