@@ -59,5 +59,16 @@ def video(request):
         print("aborted")
 
 
+def gen_logs():
+    pass
+
+
+def logger(rquest):
+    try:
+        pass
+    except:
+        pass
+
+
 def train(request):
     Main.car.train()

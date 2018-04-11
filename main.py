@@ -9,10 +9,14 @@ from car.controller import config as controller
 from car.sensor import config as sensor
 from pilot import config as pilot
 from utility import utility_config as utility
+from utility.logger import Logger
 from utility.singleton import Singleton
+import traceback
 
 
 class Main(metaclass=Singleton):
+    logger = Logger()
+
     def __init__(self):
         # Load Configuration
         self.utility_config = utility.utility_config
@@ -25,7 +29,8 @@ class Main(metaclass=Singleton):
         """
         # Initialize non parameterized objects
         """
-        First Initialize non parameterized objects, and add parameterized objects into dictionary for later Initialization
+        First Initialize non parameterized objects, and add parameterized objects into dictionary 
+        for later Initialization
         """
         self.non_tp_objects = {}  # Dictionary of non threaded non parameterized objects
         self.non_p_objects = {}  # Dictionary of threaded non parameterized objects
@@ -33,6 +38,7 @@ class Main(metaclass=Singleton):
         self.sensor_objects = {}
         self.car = Car()
         self.non_p_objects['car'] = self.car
+        self.non_p_objects['logger'] = Main.logger
         # Initialize utility module objects
         self.initialize_utility()
         # Initialize controller module objects
@@ -87,8 +93,8 @@ class Main(metaclass=Singleton):
                     else:
                         # Initialize object and append to non threaded non parameterized
                         self.non_tp_objects[name] = obj()
-            elif name in self.utility_config.modules and inspect.ismodule(obj) and self.utility_config.modules[
-                name].is_active:
+            elif name in self.utility_config.modules and inspect.ismodule(obj)\
+                    and self.utility_config.modules[name].is_active:
                 print(name)
                 obj = getattr(obj, self.utility_config.modules[name].class_name)
                 if self.utility_config.modules[name].parameterized:
@@ -117,8 +123,8 @@ class Main(metaclass=Singleton):
                     else:
                         # Initialize object and append to non threaded non parameterized
                         self.non_tp_objects[name] = obj()
-            elif name in self.controller_config.modules and inspect.ismodule(obj) and self.controller_config.modules[
-                name].is_active:
+            elif name in self.controller_config.modules and inspect.ismodule(obj) \
+                    and self.controller_config.modules[name].is_active:
                 obj = getattr(obj, self.controller_config.modules[name].class_name)
                 if self.controller_config.modules[name].parameterized:
                     # append to parameterized objects dictionary for later Initialization
@@ -211,4 +217,5 @@ if __name__ == "__main__":
         main = Main()
         main.car.train()
     except Exception as error:
-        pass
+        trace = traceback.print_exc()
+        Main.logger.log(error, trace)

@@ -7,7 +7,7 @@ from utility.status import Status
 class Logger(metaclass=Singleton):
     LOG_PATH = '/home/pi/Development/Alpha-Neuron/utility/logs/'
 
-    def __init__(self, which, everything=True):
+    def __init__(self, which=None, everything=True):
         self._session_name = 'others.log'
         self.status = Status()
         if not everything:
