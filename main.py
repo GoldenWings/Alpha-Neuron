@@ -93,7 +93,7 @@ class Main(metaclass=Singleton):
                     else:
                         # Initialize object and append to non threaded non parameterized
                         self.non_tp_objects[name] = obj()
-            elif name in self.utility_config.modules and inspect.ismodule(obj)\
+            elif name in self.utility_config.modules and inspect.ismodule(obj) \
                     and self.utility_config.modules[name].is_active:
                 print(name)
                 obj = getattr(obj, self.utility_config.modules[name].class_name)
