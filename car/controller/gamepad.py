@@ -73,13 +73,13 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
             elif event.code == BTN_TR:
                 if self.car.status.is_trainer:
                     self.car.inc_speed()
-                    self.logger.log('Increase speed')
+                    self.logger.log('Increasing speed {}'.format(self.car.current_speed))
                 else:
                     self.logger.log("Can't inc speed on agent mode")
             elif event.code == BTN_TL:
                 if self.car.status.is_trainer:
                     self.car.dec_speed()
-                    self.logger.log("Decrease speed")
+                    self.logger.log("Decreasing speed {}".format(self.car.current_speed))
                 else:
                     self.logger.log("Can't dec speed on agent mode")
             elif event.code == BTN_START:
@@ -127,15 +127,15 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     if self._abs_Yaxis_up > 5:
                         self.car.move_forward()
                         self._abs_Yaxis_up = 0
-                        self.logger.log("Go forward")
+                        self.logger.log("Going forward")
                 elif event.code in ABs_Xaxis:
                     self._abs_Xaxis_left += 1
                     if self._abs_Xaxis_left > 2:
                         self.car.turn_left()
+                        self.logger.log("Going left with angel = {}".format(self.car.current_angle))
                         self._abs_Xaxis_left = 0
                         if self._abs_Xaxis_right < 3:
                             self._abs_Xaxis_right = 0
-                        self.logger.log("Go left")
 
             elif event.value > 0:
                 if event.code in ABS_Yaxis:
@@ -143,15 +143,15 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     if self._abs_Yaxis_down > 5:
                         self.car.move_backward()
                         self._abs_Yaxis_down = 0
-                        self.logger.log("Go backward")
+                        self.logger.log("Going backward")
                 elif event.code in ABs_Xaxis:
                     self._abs_Xaxis_right += 1
                     if self._abs_Xaxis_right > 2:
                         self.car.turn_right()
+                        self.logger.log("Going right with angle = {}".format(self.car.current_angle))
                         self._abs_Xaxis_right = 0
                         if self._abs_Xaxis_left < 3:
                             self._abs_Xaxis_left = 0
-                        self.logger.log("Go right")
 
     def start(self):
         if not self.is_alive():
