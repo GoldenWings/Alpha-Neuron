@@ -46,7 +46,7 @@ class PiCamera(Thread):
         return the frame most recently read
         :return: img_name
         """
-            return self.img_name
+        return self.img_name
 
     def run(self):
         """this method get image frame from camera and save it using barrel_writer"""
