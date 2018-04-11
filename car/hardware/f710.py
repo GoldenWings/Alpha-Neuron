@@ -3,22 +3,22 @@ from evdev import InputDevice, list_devices
 
 class F710:
     f710 = None
-    __f710_name = ["Logitech Logitech Cordless RumblePad 2", "Logitech Gamepad F710"]
-    __f710_path = ''
+    _f710_name = ["Logitech Logitech Cordless RumblePad 2", "Logitech Gamepad F710"]
+    _f710_path = ''
 
     @property
-    def __find_f710(self):
+    def _find_f710(self):
 
         devices = [InputDevice(fn) for fn in list_devices()]
         for device in devices:
-            if device.name in self.__f710_name:
-                self.__f710_path = str(device.fn)
+            if device.name in self._f710_name:
+                self._f710_path = str(device.fn)
                 return True
 
-    def __set_f710(self):
+    def _set_f710(self):
         # Open the device
-        if self.__find_f710:
-            self.f710 = InputDevice(self.__f710_path)
+        if self._find_f710:
+            self.f710 = InputDevice(self._f710_path)
         else:
             raise Exception('Please check the USB dongle, no F710 found !!')
 
