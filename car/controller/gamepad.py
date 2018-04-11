@@ -26,12 +26,12 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
         self.car = objects.get('car') 
         self.barrel_writer = objects.get('barrelwriter')
         self.logger = objects.get('logger')
-        self.__abs_Yaxis_up = 0
-        self.__abs_Yaxis_down = 0
-        self.__abs_Xaxis_right = 0
-        self.__abs_Xaxis_left = 0
-        self.__start_time = None
-        self.__end_time = None
+        self._abs_Yaxis_up = 0
+        self._abs_Yaxis_down = 0
+        self._abs_Xaxis_right = 0
+        self._abs_Xaxis_left = 0
+        self._start_time = None
+        self._end_time = None
 
     def categorize(self, event):
         if event.type == EV_KEY:
@@ -87,7 +87,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                             self.car.status.continue_recording()
                             self.logger.log('Continue recording')
                         else:
-                            self.__start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                            self._start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                             self.car.status.start_recording()
                             self.logger.log('Start recording')
             elif event.code == BTN_MODE:
@@ -98,8 +98,8 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     if self.car.status.is_recording or self.car.status.is_paused:
                         self.logger.log("Start aborting the session it may take some time")
                         self.car.status.reset_recording_status()
-                        self.__end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                        self.barrel_writer.abort_csv(self.__start_time, self.__end_time)
+                        self._end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                        self.barrel_writer.abort_csv(self._start_time, self._end_time)
                         self.logger.log("The session has been aborted successfully")
                     else:
                         self.logger.log("There is no session to abort")
@@ -110,7 +110,7 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 else:
                     if self.car.status.is_recording or self.car.status.is_paused:
                         self.car.status.reset_recording_status()
-                        self.barrel_writer.save_csv(self.__start_time)
+                        self.barrel_writer.save_csv(self._start_time)
                         self.logger.log('Save session ')
                     else:
                         self.logger.log("There is no session to save")
@@ -118,34 +118,34 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
 
             if event.value < 0:
                 if event.code in ABS_Yaxis:
-                    self.__abs_Yaxis_up += 1
-                    if self.__abs_Yaxis_up > 5:
+                    self._abs_Yaxis_up += 1
+                    if self._abs_Yaxis_up > 5:
                         self.car.move_forward()
-                        self.__abs_Yaxis_up = 0
+                        self._abs_Yaxis_up = 0
                         self.logger.log("Go forward")
                 elif event.code in ABs_Xaxis:
-                    self.__abs_Xaxis_left += 1
-                    if self.__abs_Xaxis_left > 2:
+                    self._abs_Xaxis_left += 1
+                    if self._abs_Xaxis_left > 2:
                         self.car.turn_left()
-                        self.__abs_Xaxis_left = 0
-                        if self.__abs_Xaxis_right < 3:
-                            self.__abs_Xaxis_right = 0
+                        self._abs_Xaxis_left = 0
+                        if self._abs_Xaxis_right < 3:
+                            self._abs_Xaxis_right = 0
                         self.logger.log("Go left")
 
             elif event.value > 0:
                 if event.code in ABS_Yaxis:
-                    self.__abs_Yaxis_down += 1
-                    if self.__abs_Yaxis_down > 5:
+                    self._abs_Yaxis_down += 1
+                    if self._abs_Yaxis_down > 5:
                         self.car.move_backward()
-                        self.__abs_Yaxis_down = 0
+                        self._abs_Yaxis_down = 0
                         self.logger.log("Go backward")
                 elif event.code in ABs_Xaxis:
-                    self.__abs_Xaxis_right += 1
-                    if self.__abs_Xaxis_right > 2:
+                    self._abs_Xaxis_right += 1
+                    if self._abs_Xaxis_right > 2:
                         self.car.turn_right()
-                        self.__abs_Xaxis_right = 0
-                        if self.__abs_Xaxis_left < 3:
-                            self.__abs_Xaxis_left = 0
+                        self._abs_Xaxis_right = 0
+                        if self._abs_Xaxis_left < 3:
+                            self._abs_Xaxis_left = 0
                         self.logger.log("Go right")
 
     def start(self):
