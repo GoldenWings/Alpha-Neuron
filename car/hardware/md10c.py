@@ -24,6 +24,11 @@ class Md10c:
         self.p.start(0)  # set the duty cycle by zero
 
     def set_dir(self, isforward=True):
+        """
+        This method set the motor driver current direction.
+        :param isforward: take boolean that represent the direction true is forward false is backward.
+        :return: it has no return type
+        """
         if isforward is True:
             GPIO.output(self._md10c_dir_pin, GPIO.HIGH)
             self._md10c_dir_isforward = True
@@ -36,10 +41,11 @@ class Md10c:
 
     def set_speed(self, requested_speed):
         """
-                :param requested_speed: the speed required by the motor ranged from 0 to 1
-                if requested speed is 0, that means the request is break
-                It sets the speed to slow down in higher speeds, waits .01 second change frequency and duty to
-                full stop.
+        This method set the frequency and the duty cycle of the motor driver current.
+        :param requested_speed:the speed required by the motor ranged from 0 to 1
+        if requested speed is 0, that means the request is breakIt sets the speed to slow down in higher speeds,
+        waits .01 second change frequency and duty to full stop.
+        :return: it has no return type.
         """
         self._md10c_speed = requested_speed
         if requested_speed == 0:
