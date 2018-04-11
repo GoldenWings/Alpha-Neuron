@@ -20,6 +20,6 @@ class Servo(Pca9685, metaclass=Singleton):
     def angle(self):
         """
         This property return the car servo current angle
-        :return: the servo ange ex:45
+        :return: the servo ange ex:20
         """
         return self.current_angle
