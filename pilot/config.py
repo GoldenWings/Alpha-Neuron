@@ -18,7 +18,7 @@ agent_outputs = [
 ]
 agent_config = Config(name='driving_nn', class_name='DrivingNeuralNetwork', inputs=agent_inputs, outputs=agent_outputs,
                       is_active=True, is_threaded=True,
-                      parameters=['car'])
+                      parameters=['car', 'logger'])
 
 # Package Configuration
 pilot_modules = {agent_config.name: agent_config}
