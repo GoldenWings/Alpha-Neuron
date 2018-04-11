@@ -39,6 +39,6 @@ class Logger(metaclass=Singleton):
                 formatted_msg = "@@{}\n{}\t{}".format(error_type, msg_date, msg)
                 f.write(formatted_msg)
             else:
-                formatted_msg = "{}\t{}".format(msg_date, msg)
+                formatted_msg = "##'\n'{}\t{}".format(msg_date, msg)
                 f.write(formatted_msg)
             self.interface_msgs.put(bytes(formatted_msg, 'utf-8'))
