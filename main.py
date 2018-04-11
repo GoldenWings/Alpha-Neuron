@@ -206,3 +206,4 @@ class Main(metaclass=Singleton):
 
 if __name__ == "__main__":
     main = Main()
+    main.car.train()
