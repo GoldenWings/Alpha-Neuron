@@ -2,7 +2,7 @@ import queue
 import threading
 import numpy as np
 import keras
-
+from car.hardware.config import SERVO_EFFECTIVE_ANGLE
 from .model_architecture import build_model
 
 
@@ -33,6 +33,13 @@ class DrivingNeuralNetwork:
         self.prediction_thread.start()
 
     @staticmethod
+    def denormalize(normalized):
+        min_angle = SERVO_EFFECTIVE_ANGLE[0]
+        max_angle = SERVO_EFFECTIVE_ANGLE[1]
+        denormalized = (normalized * (max_angle - min_angle) + min_angle)
+        return denormalized
+
+    @staticmethod
     def linear_unbin(arr):
         b = np.argmax(arr)
         a = b * (2 / 14) - 1
@@ -42,9 +49,14 @@ class DrivingNeuralNetwork:
         while self._car.status.is_agent:
             frame = self.frame_queue.get()
             img_arr = frame.reshape((1,) + frame.shape)
-            angle, throttle = self.model.predict(img_arr)
-            prediction = "steering angle = {} throttle = {}".format(angle, throttle)
-            angle = DrivingNeuralNetwork.linear_unbin(angle)
+            binned_angle, throttle = self.model.predict(img_arr)
+            unbinned_angle = DrivingNeuralNetwork.linear_unbin(binned_angle)
+            angle = DrivingNeuralNetwork.denormalize(unbinned_angle)
+            prediction = "Binned steering angle = {} Unbinned steering angle {} " \
+                         " final angle throttle = {}".format(binned_angle, unbinned_angle,
+                                                             angle, throttle)
+            self._car.set_angle(angle)
+            self._car.set
             self._logger.log(prediction)
             self.frame_queue.task_done()
 
