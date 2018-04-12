@@ -6,7 +6,6 @@ import pandas as pd
 from PIL import Image
 import numpy as np
 from datetime import datetime
-import scipy
 
 
 # noinspection PyTypeChecker
@@ -109,10 +108,8 @@ class BarrelReader(metaclass=Singleton):
 
     # noinspection PyMethodMayBeStatic
     def get_image(self, img_path):
-        height, width, channels = scipy.ndimage.imread(IMAGE_PATH+img_path).shape
         img = Image.open(IMAGE_PATH+img_path)
         img_arr = np.array(img)
-        print('image shape: {} X {} x {}'.format(height, width, channels))
         return img_arr
 
     def get_record(self, record_dict):
@@ -150,7 +147,15 @@ class BarrelReader(metaclass=Singleton):
         self.df = pd.read_csv(self.get_csv())
 
     @staticmethod
+    def normalize(given_angle):
+        min_angle = SERVO_EFFECTIVE_ANGLE[0]
+        max_angle = SERVO_EFFECTIVE_ANGLE[1]
+        normalized = (given_angle - min_angle) / (max_angle - min_angle)
+        return normalized
+
+    @staticmethod
     def linear_bin(a):
+        BarrelReader.normalize(a)
         a = a + 1
         b = round(a / (2 / 14))
         arr = np.zeros(15)
