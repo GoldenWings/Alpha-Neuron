@@ -8,10 +8,10 @@ class Pca9685:
     def __init__(self, starting_angle):
         self.pwm = Adafruit_PCA9685.PCA9685()
         self.pwm.set_pwm_freq(60)
-        self.pulse_min = SERVO_MIN_PULSE
-        self.pulse_max = SERVO_MAX_PULSE
-        self.angle_max = SERVO_MAX_ANGLE
-        self.angle_min = SERVO_MIN_ANGLE
+        self._pulse_min = SERVO_MIN_PULSE
+        self._pulse_max = SERVO_MAX_PULSE
+        self._angle_max = SERVO_MAX_ANGLE
+        self._angle_min = SERVO_MIN_ANGLE
         self.set_angle(starting_angle)
 
     def set_angle(self, req_angle):
@@ -23,6 +23,6 @@ class Pca9685:
         package.
         :return: it has no return type
         """
-        req_angle_pulse = ((self.angle_max - self.angle_min) / (self.pulse_max - self.pulse_min)) * (
-                req_angle - self.pulse_max) + self.angle_max
+        req_angle_pulse = (self._pulse_max - self._pulse_min) / (self._angle_max - self._angle_min) * (
+                req_angle - self._angle_max) + self._pulse_max
         self.pwm.set_pwm(SERVO_CHANEL, 0, int(req_angle_pulse))
