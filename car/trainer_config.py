@@ -1,7 +1,7 @@
 import os
 BATCH_SIZE = 128
 TRAIN_TEST_SPLIT = 0.8
-MODEL_PATH = '/pilot/models/'
+MODEL_PATH = '/home/pi/Development/Alpha-Neuron/pilot/models/'
 
 
 def count_models():
