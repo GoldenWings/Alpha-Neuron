@@ -39,7 +39,6 @@ class Pca9685:
             req_angle = self.min
         elif req_angle >= self.max:
             req_angle = self.max
-        print(req_angle)
         self.current_angle = req_angle
         self._set_angle(SERVO_CHANEL)
 
