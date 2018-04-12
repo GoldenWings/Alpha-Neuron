@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from dateutil import tz
 import operator
+from car.hardware.config import SERVO_EFFECTIVE_ANGLE
 
 DATA_PATH = '/home/pi/Development/Alpha-Neuron/Training Data/'
 IMAGE_PATH = '/home/pi/Development/Alpha-Neuron/Training Data/Images/'
