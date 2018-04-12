@@ -3,12 +3,13 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.signals import user_logged_out
 from django.dispatch import receiver
-from django.http import HttpResponseServerError, StreamingHttpResponse
+from django.http import HttpResponseServerError, StreamingHttpResponse, HttpResponse
 from django.http import JsonResponse
 from django.views import generic
 from django.views.decorators import gzip
 from main import Main as Access
 Main = Access()
+logger = Access.logger
 
 
 class TrainerView(LoginRequiredMixin, generic.TemplateView):
@@ -60,15 +61,16 @@ def video(request):
 
 
 def gen_logs():
-    pass
+    while True:
+        if logger.interface_msgs.empty():
+            continue
+        log_msg = {'log': logger.interface_msgs.get()}
+        print(log_msg)
+        HttpResponse(log_msg)
 
 
-def logger(rquest):
+def loggerFunc(rquest):
     try:
-        pass
-    except:
-        pass
-
-
-def train(request):
-    Main.car.train()
+        return JsonResponse(gen_logs())
+    except Exception as e:
+        print("aborted")

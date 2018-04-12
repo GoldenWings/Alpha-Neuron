@@ -38,7 +38,7 @@ class Main(metaclass=Singleton):
         self.sensor_objects = {}
         self.car = Car()
         self.non_p_objects['car'] = self.car
-        self.non_p_objects['logger'] = Main.logger
+        self.non_tp_objects['logger'] = Main.logger
         # Initialize utility module objects
         self.initialize_utility()
         # Initialize controller module objects
@@ -46,7 +46,7 @@ class Main(metaclass=Singleton):
         # Initialize sensor module objects
         self.initialize_sensor()
         # Initialize pilot module objects
-
+        self.initialize_pilot()
         # Initialize parameterized objects
         """
             parameterized_objects structure:
@@ -215,7 +215,9 @@ class Main(metaclass=Singleton):
 if __name__ == "__main__":
     try:
         main = Main()
+        print('Start')
         main.car.train()
+        print('Finish')
     except Exception as error:
         trace = traceback.format_exc()
         mssg = '{}\n{}'.format(trace, str(error))

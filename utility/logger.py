@@ -11,6 +11,7 @@ class Logger(metaclass=Singleton):
     def __init__(self, which=None, everything=True):
         self._session_name = 'others.log'
         self.status = Status()
+        self.interface_msgs = queue.LifoQueue()
         if not everything:
             self.agent = which.get('agent') if which.get('agent') else False
             self.trainer = which.get('agent') if which.get('agent') else False
@@ -24,7 +25,6 @@ class Logger(metaclass=Singleton):
             self.everything = everything
             self._session_start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
             self._session_name = self._session_start_time + '.log'
-            self.interface_msgs = queue.LifoQueue()
 
     def log(self, msg, error_type=None):
         """
@@ -32,7 +32,11 @@ class Logger(metaclass=Singleton):
         :param error_type: type of log message __name__ of module happened
         :return:
         """
-        if self.status.is_trainer is not self.trainer or self.status.is_agent is not self.agent:
+        if self.status.is_trainer and not self.trainer:
+            print('FUCKED')
+            return
+        elif self.status.is_agent and not self.agent:
+            print('FUCKED 2')
             return
         msg_date = datetime.now().strftime('%H:%M')
         with open(Logger.LOG_PATH + self._session_name, 'a') as f:

@@ -1,6 +1,6 @@
 import queue
 import threading
-
+import numpy as np
 import keras
 
 from .model_architecture import build_model
@@ -32,12 +32,19 @@ class DrivingNeuralNetwork:
                                                       args=())
         self.prediction_thread.start()
 
+    @staticmethod
+    def linear_unbin(arr):
+        b = np.argmax(arr)
+        a = b * (2 / 14) - 1
+        return a
+
     def predict_from_queue(self):
         while self._car.status.is_agent:
             frame = self.frame_queue.get()
             img_arr = frame.reshape((1,) + frame.shape)
             angle, throttle = self.model.predict(img_arr)
             prediction = "steering angle = {} throttle = {}".format(angle, throttle)
+            angle = DrivingNeuralNetwork.linear_unbin(angle)
             self._logger.log(prediction)
             self.frame_queue.task_done()
 
@@ -49,26 +56,29 @@ class DrivingNeuralNetwork:
         train_gen: generator that yields an array of images an array of
 
         """
-
+        print('Save Best')
         # checkpoint to save model after each epoch
         save_best = keras.callbacks.ModelCheckpoint(saved_model_path,
                                                     monitor='val_loss',
                                                     verbose=verbose,
                                                     save_best_only=True,
                                                     mode='min')
-
+        print('Save best finish')
         # stop training if the validation error stops improving.
         early_stop = keras.callbacks.EarlyStopping(monitor='val_loss',
                                                    min_delta=min_delta,
                                                    patience=patience,
                                                    verbose=verbose,
                                                    mode='auto')
-
+        print('early stop finish')
         callbacks_list = [save_best]
 
         if use_early_stop:
             callbacks_list.append(early_stop)
-
+        print('start fitting')
+        print(steps, train_split)
+        val_steps = steps * (1.0 - train_split) / train_split
+        print(val_steps)
         hist = self.model.fit_generator(
             train_gen,
             steps_per_epoch=steps,
@@ -76,7 +86,8 @@ class DrivingNeuralNetwork:
             verbose=1,
             validation_data=val_gen,
             callbacks=callbacks_list,
-            validation_steps=steps * (1.0 - train_split) / train_split)
+            validation_steps=val_steps)
+        print('finish fiting')
         return hist
 
     def obstacle_avoidance(self):

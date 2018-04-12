@@ -6,6 +6,7 @@ import pandas as pd
 from PIL import Image
 import numpy as np
 from datetime import datetime
+import scipy
 
 
 # noinspection PyTypeChecker
@@ -108,8 +109,10 @@ class BarrelReader(metaclass=Singleton):
 
     # noinspection PyMethodMayBeStatic
     def get_image(self, img_path):
-        img = Image.open(img_path)
+        height, width, channels = scipy.ndimage.imread(IMAGE_PATH+img_path).shape
+        img = Image.open(IMAGE_PATH+img_path)
         img_arr = np.array(img)
+        print('image shape: {} X {} x {}'.format(height, width, channels))
         return img_arr
 
     def get_record(self, record_dict):
@@ -120,9 +123,9 @@ class BarrelReader(metaclass=Singleton):
         """
         record = {}
         for key, value in record_dict.items():
-            if key is 'image':
+            if key == 'image':
                 value = self.get_image(value)
-            record[value] = key
+            record[key] = value
         return record
 
     def get_csv(self):
@@ -133,10 +136,10 @@ class BarrelReader(metaclass=Singleton):
         """
         if self.latest:
             latest_csv_name = get_latest_csv()
-            barrel_full_name = DATA_PATH + str(latest_csv_name) + '.csv'
+            barrel_full_name = DATA_PATH + str(latest_csv_name)
             return barrel_full_name
-        if os.path.isfile(os.path.join(DATA_PATH, self.barrel_name + '.csv')):
-            return DATA_PATH + self.barrel_name + '.csv'
+        if os.path.isfile(os.path.join(DATA_PATH, self.barrel_name)):
+            return DATA_PATH + self.barrel_name
         raise FileNotFoundError("Barrel path incorrect")
 
     def load_df(self):
@@ -146,17 +149,30 @@ class BarrelReader(metaclass=Singleton):
         """
         self.df = pd.read_csv(self.get_csv())
 
+    @staticmethod
+    def linear_bin(a):
+        a = a + 1
+        b = round(a / (2 / 14))
+        arr = np.zeros(15)
+
+        arr[int(b)] = 1
+        return arr
+
     def generate_record(self, df=None):
         """
         read csv records (with images instead of path) and shuffle it
         :param df: dataframe to use to extract records
         :return:
         """
-        if not df:
+        if df is None:
             df = self.df
         while True:
             for _ in df.iterrows():
                 record_dict = df.sample(n=1).to_dict(orient='record')[0]
+                try:
+                    record_dict['angle'] = BarrelReader.linear_bin(record_dict['angle'])
+                except IndexError as e:
+                    pass
 
                 record_dict = self.get_record(record_dict)
                 yield record_dict

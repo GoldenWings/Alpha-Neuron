@@ -129,8 +129,9 @@ class Car(metaclass=Singleton):
         steps_per_epoch = total_train // cfg.BATCH_SIZE
         print('steps_per_epoch', steps_per_epoch)
 
-        self.driving_nn.train(train_gen, val_gen, saved_model_path=model_path, steps=steps_per_epoch,
+        x = self.driving_nn.train(train_gen, val_gen, saved_model_path=model_path, steps=steps_per_epoch,
                               train_split=cfg.TRAIN_TEST_SPLIT)
+        print(x)
 
     @property
     def barrel_reader(self):
