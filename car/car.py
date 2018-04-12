@@ -63,6 +63,9 @@ class Car(metaclass=Singleton):
         """This method turn the car left """
         self._objects['servo'].turn_left()
 
+    def set_angle(self, req_angle):
+        self._objects['servo'].set_angle(req_angle)
+
     @property
     def current_angle(self):
         """
