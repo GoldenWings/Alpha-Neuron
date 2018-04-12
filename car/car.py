@@ -98,6 +98,12 @@ class Car(metaclass=Singleton):
         """
         return self._objects['motor'].throttle
 
+    def set_throttle(self, throttle):
+        """
+        This method set the throttle of the car Usage: DrivingNN only!
+        """
+        self._objects['motor'].set_throttle(throttle)
+
     def brake(self):
         """This method is used to stop the car or by other mean this is the breaks """
         self._objects['motor'].brake()
