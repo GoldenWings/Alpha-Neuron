@@ -72,5 +72,8 @@ class Motor(Md10c, metaclass=Singleton):
         """
         return self._current_speed
 
+    def set_throttle(self, speed):
+        self.set_speed(speed)
+
     def __del__(self):
         super().__del__()
