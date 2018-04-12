@@ -29,7 +29,7 @@ class F710:
             raise Exception('Please check the USB dongle, no F710 found !!')
 
     def __init__(self):
-        self.__set_f710()
+        self._set_f710()
 
     def __del__(self):
         self.f710 = None
