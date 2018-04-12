@@ -25,4 +25,4 @@ class Pca9685:
         """
         req_angle_pulse = (self._pulse_max - self._pulse_min) / (self._angle_max - self._angle_min) * (
                 req_angle - self._angle_max) + self._pulse_max
-        self.pwm.set_pwm(SERVO_CHANEL, 0, int(req_angle_pulse))
+        self.pwm.set_pwm(SERVO_CHANEL, 0, int(round(req_angle_pulse)))
