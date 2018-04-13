@@ -56,7 +56,7 @@ class DrivingNeuralNetwork:
                          " final angle throttle = {}".format(binned_angle, unbinned_angle,
                                                              angle, throttle)
             self._car.set_angle(angle)
-            self._car.set
+            self._car.set_throttle(throttle)
             self._logger.log(prediction)
             self.frame_queue.task_done()
 
