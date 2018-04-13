@@ -126,7 +126,7 @@ class Car(metaclass=Singleton):
          """
         train_gen, val_gen = self.barrel_reader.generate_training_validation(cfg.BATCH_SIZE,
                                                                              cfg.TRAIN_TEST_SPLIT)
-        model_name = 'model_ ' + str(cfg.count_models() + 1)
+        model_name = '{}model_{}.h5'.format(cfg.MODEL_PATH, str(cfg.count_models() + 1))
         model_path = os.path.normpath(model_name)
         model_path = os.path.expanduser(model_path)
 
