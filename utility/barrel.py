@@ -173,10 +173,7 @@ class BarrelReader(metaclass=Singleton):
         while True:
             for _ in df.iterrows():
                 record_dict = df.sample(n=1).to_dict(orient='record')[0]
-                try:
-                    record_dict['angle'] = BarrelReader.linear_bin(record_dict['angle'])
-                except IndexError as e:
-                    pass
+                record_dict['angle'] = BarrelReader.linear_bin(record_dict['angle'])
 
                 record_dict = self.get_record(record_dict)
                 yield record_dict
