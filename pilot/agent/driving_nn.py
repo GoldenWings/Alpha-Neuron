@@ -3,16 +3,19 @@ import threading
 import numpy as np
 import keras
 from car.hardware.config import SERVO_EFFECTIVE_ANGLE
+from car.trainer_config import *
 from .model_architecture import build_model
 
 
 class DrivingNeuralNetwork:
-    def __init__(self, objects, model=None):
+    def __init__(self, objects, model_path=None):
         self._car = objects.get('car')
         self._logger = objects.get('logger')
-        self.model = model
-        if model:
-            self.model = model
+        if model_path:
+            self.load(model_path)
+        elif count_models() > 0:
+            model_path = "{}model_{}.h5".format(MODEL_PATH, count_models())
+            self.load(model_path)
         else:
             self.model = build_model()
         self.frame_queue = queue.LifoQueue()
@@ -28,8 +31,8 @@ class DrivingNeuralNetwork:
 
     def start(self):
         self.prediction_thread = threading.Thread(name="Prediction thread",
-                                                      target=self.predict_from_queue,
-                                                      args=())
+                                                  target=self.predict_from_queue,
+                                                  args=())
         self.prediction_thread.start()
 
     @staticmethod
