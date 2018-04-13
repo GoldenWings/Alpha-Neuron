@@ -149,7 +149,7 @@ class BarrelReader(metaclass=Singleton):
     def normalize(given_angle):
         min_angle = SERVO_EFFECTIVE_ANGLE[0]
         max_angle = SERVO_EFFECTIVE_ANGLE[1]
-        normalized = (given_angle - min_angle) / (max_angle - min_angle)
+        normalized = 2 * (given_angle - min_angle) / (max_angle - min_angle) - 1
         return normalized
 
     @staticmethod

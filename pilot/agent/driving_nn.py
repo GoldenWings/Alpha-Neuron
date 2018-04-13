@@ -39,7 +39,7 @@ class DrivingNeuralNetwork:
     def denormalize(normalized):
         min_angle = SERVO_EFFECTIVE_ANGLE[0]
         max_angle = SERVO_EFFECTIVE_ANGLE[1]
-        denormalized = (normalized * (max_angle - min_angle) + min_angle)
+        denormalized = ((normalized + 1) * (max_angle - min_angle) + (2 * min_angle)) / 2
         return denormalized
 
     @staticmethod
