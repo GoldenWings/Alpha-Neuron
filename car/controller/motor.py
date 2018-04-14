@@ -19,8 +19,8 @@ class Motor(Md10c, metaclass=Singleton):
             self.set_dir(False)
         elif self.get_dir():
             self.dec_speed()
-        else:
-            self.inc_speed()
+            return
+        self.inc_speed()
 
     def move_forward(self):
         """
@@ -32,8 +32,8 @@ class Motor(Md10c, metaclass=Singleton):
             self.set_dir(True)
         elif not self.get_dir():
             self.dec_speed()
-        else:
-            self.inc_speed()
+            return
+        self.inc_speed()
 
     def brake(self):
         """
