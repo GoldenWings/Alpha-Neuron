@@ -215,9 +215,9 @@ class Main(metaclass=Singleton):
 if __name__ == "__main__":
     try:
         main = Main()
-        print('Start')
-        main.car.train()
-        print('Finish')
+        # print('Start')
+        # main.car.train()
+        # print('Finish')
     except Exception as error:
         trace = traceback.format_exc()
         mssg = '{}\n{}'.format(trace, str(error))

@@ -32,18 +32,12 @@ class Logger(metaclass=Singleton):
         :param error_type: type of log message __name__ of module happened
         :return:
         """
-        if self.status.is_trainer and not self.trainer:
-            print('FUCKED')
-            return
-        elif self.status.is_agent and not self.agent:
-            print('FUCKED 2')
-            return
         msg_date = datetime.now().strftime('%H:%M')
         with open(Logger.LOG_PATH + self._session_name, 'a') as f:
             if error_type:
                 formatted_msg = "@@{}\t{}\n{}".format(error_type, msg_date, msg)
                 f.write(formatted_msg)
             else:
-                formatted_msg = "##'\n'{}\t{}".format(msg_date, msg)
+                formatted_msg = "##\n{}\t{}\n".format(msg_date, msg)
                 f.write(formatted_msg)
-            self.interface_msgs.put(bytes(formatted_msg, 'utf-8'))
+            self.interface_msgs.put(formatted_msg.strip('\n'))

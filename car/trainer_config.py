@@ -8,6 +8,6 @@ def count_models():
     count = 0
     for name in os.listdir(MODEL_PATH):
         if os.path.isfile(os.path.join(MODEL_PATH, name)):
-            if os.path.splitext(name)[1] == '.hd5':
+            if os.path.splitext(name)[1] == '.h5':
                 count += 1
     return count

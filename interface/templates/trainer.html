@@ -263,6 +263,9 @@
                 },
                 dataType: 'json',
                 success: function (data) {
+                    if (data.status) {
+                        window.location.href = "../agent/";
+                    }
                     radarChartData = {
         labels: ["F3", "F4", "L", "B3", "B2", "B1", "R", "F1", "F2"],
             datasets: [
@@ -277,7 +280,7 @@
                 data: data.radar
             }
         ]
-    };  
+                    };
         window.myRadar = new Chart(document.getElementById("canvas").getContext("2d")).Radar(radarChartData, {
             responsive: true
         });

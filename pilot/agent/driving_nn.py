@@ -5,6 +5,7 @@ import keras
 from car.hardware.config import SERVO_EFFECTIVE_ANGLE
 from car.trainer_config import *
 from .model_architecture import build_model
+import tensorflow as tf
 
 
 class DrivingNeuralNetwork:
@@ -12,19 +13,26 @@ class DrivingNeuralNetwork:
         self._car = objects.get('car')
         self._logger = objects.get('logger')
         if model_path:
+            self._logger.log('Model path is given...')
             self.load(model_path)
         elif count_models() > 0:
+            self._logger.log('No path for model provided, will load latest model...')
             model_path = "{}model_{}.h5".format(MODEL_PATH, count_models())
             self.load(model_path)
         else:
+            self._logger.log('No models exist in pilot/models ! \n Building model...')
             self.model = build_model()
+            self._logger.log('Building model completed successfully')
+        self.graph = tf.get_default_graph()
         self.frame_queue = queue.LifoQueue()
         self.prediction_thread = threading.Thread(name="Prediction thread",
                                                   target=self.predict_from_queue,
                                                   args=())
 
     def load(self, model_path):
+        self._logger.log('Loading model...')
         self.model = keras.models.load_model(model_path)
+        self._logger.log('Model successfully loaded!')
 
     def put(self, frame):
         self.frame_queue.put(frame)
@@ -50,18 +58,18 @@ class DrivingNeuralNetwork:
 
     def predict_from_queue(self):
         while self._car.status.is_agent:
-            frame = self.frame_queue.get()
-            img_arr = frame.reshape((1,) + frame.shape)
-            binned_angle, throttle = self.model.predict(img_arr)
-            unbinned_angle = DrivingNeuralNetwork.linear_unbin(binned_angle)
-            angle = DrivingNeuralNetwork.denormalize(unbinned_angle)
-            prediction = "Binned steering angle = {} Unbinned steering angle {} " \
-                         " final angle throttle = {}".format(binned_angle, unbinned_angle,
-                                                             angle, throttle)
-            self._car.set_angle(angle)
-            self._car.set_throttle(throttle)
-            self._logger.log(prediction)
-            self.frame_queue.task_done()
+            with self.graph.as_default():
+                frame = self.frame_queue.get()
+                img_arr = frame.reshape((1,) + frame.shape)
+                binned_angle, throttle = self.model.predict(img_arr)
+                unbinned_angle = DrivingNeuralNetwork.linear_unbin(binned_angle)
+                angle = DrivingNeuralNetwork.denormalize(unbinned_angle)
+                prediction = "Unbinned steering angle {} " \
+                             " final angle {} throttle = {}".format(unbinned_angle, angle, throttle[0][0])
+                self._car.set_angle(angle)
+                self._car.set_throttle(throttle[0][0])
+                self._logger.log(prediction)
+                self.frame_queue.task_done()
 
     def train(self, train_gen, val_gen,
               saved_model_path, epochs=100, steps=100, train_split=0.8,

@@ -17,7 +17,10 @@ class Motor(Md10c, metaclass=Singleton):
         if self.get_dir() and self._current_speed == MOTOR_MIN_SPEED:  # True
             self.brake()
             self.set_dir(False)
-        self.dec_speed()
+        elif self.get_dir():
+            self.dec_speed()
+        else:
+            self.inc_speed()
 
     def move_forward(self):
         """
@@ -27,7 +30,10 @@ class Motor(Md10c, metaclass=Singleton):
         if not self.get_dir() and self._current_speed == MOTOR_MIN_SPEED:
             self.brake()
             self.set_dir(True)
-        self.inc_speed()
+        elif not self.get_dir():
+            self.dec_speed()
+        else:
+            self.inc_speed()
 
     def brake(self):
         """

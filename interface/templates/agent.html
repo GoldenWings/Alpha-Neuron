@@ -83,16 +83,16 @@ class="hold-transition skin-blue sidebar-mini"
 
             <div class="col-md-6">
                 <!-- Terminal Log -->
-                <div class="box box-danger">
+                <div id="terminal" class="box box-danger">
                     <div class="box-header with-border">
                         <h3 class="box-title">Terminal Log</h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body no-padding">
                         <div class="shell-wrap">
-                            <ul class="shell-body">
-                                {% for i in order %}
-                                    <li>{{ i }}</li>
+                            <ul id="log_table" class="shell-body">
+                                {% for i in log %}
+                                    {{ i }}
                                 {% endfor %}
                             </ul>
                         </div>
@@ -298,5 +298,25 @@ class="hold-transition skin-blue sidebar-mini"
     if (realtime2 === 'on') {
         update2()
     }
+
+    function logs() {
+        $.ajax({
+            url: 'get_logs/',
+            dataType: 'json',
+            success: function (data) {
+                $('#terminal').find('#log_table').append($("<li>").text(data.log));
+                if (data.log) {
+                    $('#terminal').find('#log_table').animate({
+                        scrollTop: $(
+                            $('#terminal').find('#log_table')
+                        ).prop("scrollHeight")
+                    }, 100);
+                }
+                setTimeout(logs, 100)
+            }
+        })
+    }
+
+    setTimeout(logs, 100)
 </script>
 {% endblock %}

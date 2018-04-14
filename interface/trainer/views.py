@@ -28,7 +28,6 @@ def send_command(request):
     processor = 0
     ram = 0
     command = request.GET.get('command', None)
-    print(command)
     if command is None:
         return
     elif command == 'radar':
@@ -39,7 +38,8 @@ def send_command(request):
     elif command == 'get_data':
         speed = Main.car.current_speed
     speed =Main.car.current_speed
-    data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram}
+    data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram, 'status':
+        Main.car.status.is_agent}
     return JsonResponse(data)
 
 
