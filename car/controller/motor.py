@@ -14,26 +14,20 @@ class Motor(Md10c, metaclass=Singleton):
         This method give the car motor an order to move backward.
         :return: it has no return type.
         """
-        if self.get_dir():
+        if self.get_dir() and self._current_speed == MOTOR_MIN_SPEED:  # True
             self.brake()
             self.set_dir(False)
-            self._current_speed = MOTOR_MIN_SPEED
-            self.set_speed(self._current_speed)
-        else:
-            self.dec_speed()
+        self.dec_speed()
 
     def move_forward(self):
         """
         This method give the car motor an order to move forward.
         :return: it has no return type.
         """
-        if not self.get_dir():
+        if not self.get_dir() and self._current_speed == MOTOR_MIN_SPEED:
             self.brake()
             self.set_dir(True)
-            self._current_speed = MOTOR_MIN_SPEED
-            self.set_speed(self._current_speed)
-        else:
-            self.inc_speed()
+        self.inc_speed()
 
     def brake(self):
         """
