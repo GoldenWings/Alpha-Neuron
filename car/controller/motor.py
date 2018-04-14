@@ -20,8 +20,7 @@ class Motor(Md10c, metaclass=Singleton):
             self._current_speed = MOTOR_MIN_SPEED
             self.set_speed(self._current_speed)
         else:
-            return
-        self.set_speed(self._current_speed)
+            self.dec_speed()
 
     def move_forward(self):
         """
@@ -34,8 +33,7 @@ class Motor(Md10c, metaclass=Singleton):
             self._current_speed = MOTOR_MIN_SPEED
             self.set_speed(self._current_speed)
         else:
-            return
-        self.set_speed(self._current_speed)
+            self.inc_speed()
 
     def brake(self):
         """
