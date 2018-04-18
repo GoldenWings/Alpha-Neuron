@@ -1,7 +1,7 @@
 import os
-
 import car.trainer_config as cfg
 from utility.singleton import Singleton
+from threading import Thread
 
 
 class Car(metaclass=Singleton):
@@ -18,6 +18,10 @@ class Car(metaclass=Singleton):
         self._sensor_objects = sensor_objects
         self._objects = {**self._objects, **self._sensor_objects}
         self.start_car()
+
+    @property
+    def barrel_writer(self):
+        return self._objects['barrelwriter']
 
     @property
     def status(self):
@@ -89,6 +93,16 @@ class Car(metaclass=Singleton):
         :return: speed ex:0.50
         """
         return self._objects['motor'].throttle
+
+    def save_session(self, start_time):
+        save_thread = Thread(name='SaveSession', target=self.barrel_writer.save_csv,
+                             args=[start_time])
+        save_thread.start()
+
+    def abort_session(self, start_time, end_time):
+        abort_thread = Thread(name='AbortSession', target=self.barrel_writer.abort_csv,
+                              args=[start_time, end_time])
+        abort_thread.start()
 
     def set_throttle(self, throttle):
         """
