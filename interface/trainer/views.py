@@ -48,6 +48,8 @@ def gen():
         frame = Main.car.camera.byte_frame
         if frame is None:
             continue
+        elif Main.car.status.is_agent:
+            break
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
@@ -60,17 +62,15 @@ def video(request):
         print("aborted")
 
 
-def gen_logs():
-    while True:
-        if logger.interface_msgs.empty():
-            continue
-        log_msg = {'log': logger.interface_msgs.get()}
-        print(log_msg)
-        HttpResponse(log_msg)
-
-
-def loggerFunc(rquest):
-    try:
-        return JsonResponse(gen_logs())
-    except Exception as e:
-        print("aborted")
+def get_logs(request):
+    data = {'status': Main.car.status.is_agent}
+    while not logger.interface_msgs.empty():
+        logs = []
+        log = logger.interface_msgs.get().replace('\n', '')
+        log = log.replace('##', '')
+        logs.append(log)
+        data['log'] = logs
+        if Main.car.status.is_agent:
+            print('UMMM')
+            break
+    return JsonResponse(data)

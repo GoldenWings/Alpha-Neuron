@@ -67,7 +67,7 @@ class DrivingNeuralNetwork:
                 prediction = "Unbinned steering angle {} " \
                              " final angle {} throttle = {}".format(unbinned_angle, angle, throttle[0][0])
                 self._car.set_angle(angle)
-                self._car.set_throttle(throttle[0][0])
+                self._car.set_throttle(1)
                 self._logger.log(prediction)
                 self.frame_queue.task_done()
 

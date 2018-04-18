@@ -34,5 +34,9 @@ PIN_DIST_ECHO4 = 35
 PIN_DIST_ECHO5 = 33
 
 # f710
-ABS_Yaxis = [17, 1]
-ABs_Xaxis = [16, 3]
+ABS_Yaxis = [1]
+ABs_Xaxis = [3]
+throttle_max = -32768
+throttle_min = 32767
+angle_max = 32768
+angle_min = -32767

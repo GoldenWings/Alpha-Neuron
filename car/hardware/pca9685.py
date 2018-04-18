@@ -12,6 +12,7 @@ class Pca9685:
         self._pulse_max = SERVO_MAX_PULSE
         self._angle_max = SERVO_MAX_ANGLE
         self._angle_min = SERVO_MIN_ANGLE
+        self._current_angle = starting_angle
         self.set_angle(starting_angle)
 
     def set_angle(self, req_angle):
@@ -23,6 +24,7 @@ class Pca9685:
         package.
         :return: it has no return type
         """
+        self._current_angle = req_angle
         req_angle_pulse = (self._pulse_max - self._pulse_min) / (self._angle_max - self._angle_min) * (
                 req_angle - self._angle_max) + self._pulse_max
         self.pwm.set_pwm(SERVO_CHANEL, 0, int(round(req_angle_pulse)))

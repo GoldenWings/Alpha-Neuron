@@ -9,6 +9,7 @@ from datetime import datetime
 
 
 # noinspection PyTypeChecker
+
 class BarrelWriter(metaclass=Singleton):
         def __init__(self, objects):
             """
@@ -20,6 +21,7 @@ class BarrelWriter(metaclass=Singleton):
 
             self.servo = objects.get('servo')
             self.motor = objects.get('motor')
+            self.logger = objects.get('logger')
             self.csv_name = None
 
         # noinspection PyMethodMayBeStatic
@@ -38,14 +40,19 @@ class BarrelWriter(metaclass=Singleton):
             then for each image split its name and write the content of the name to a dictionary
             then write it to record
             """
+            self.logger.log('Entered save_csv')
             start_time = datetime.strptime(start_time,  '%Y-%m-%d %H:%M:%S.%f')
             timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
             self.csv_name = 'session_' + timestamp + '.csv'
+            self.logger.log('csv name {}'.format(self.csv_name))
             headers = {'angle', 'throttle', 'image'}
             with open(DATA_PATH + self.csv_name, 'a') as f:
                 w = csv.DictWriter(f, headers)
                 w.writeheader()
-                for name in os.listdir(IMAGE_PATH):
+                image_files = os.listdir(IMAGE_PATH)
+                counter = 0
+                for name in image_files:
+                    counter += 1
                     if os.path.isfile(os.path.join(IMAGE_PATH, name)):
                         if os.path.splitext(name)[1] == '.jpg':
                             full_name = name.split('_')
@@ -58,6 +65,10 @@ class BarrelWriter(metaclass=Singleton):
                             record = self.get_record(throttle, angle, name)
                             if image_date >= start_time:
                                 w.writerow(record)
+                                self.logger.log('Processing image number {} of {}. '.format(str(counter),
+                                                                                            str(len(image_files))))
+                self.logger.log('Session has been done with all images!. ')
+            self.logger.log('Session has been saved successfully!. ')
 
         # noinspection PyMethodMayBeStatic
         def abort_csv(self, start_time, end_time):
@@ -79,6 +90,7 @@ class BarrelWriter(metaclass=Singleton):
                         image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
                         if start_time <= image_date <= end_time:
                             os.remove(IMAGE_PATH + name)
+            self.logger.log("The session has been aborted successfully")
 
         # noinspection PyMethodMayBeStatic
         def save_image(self, img):

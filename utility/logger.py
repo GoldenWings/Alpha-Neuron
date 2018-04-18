@@ -40,4 +40,5 @@ class Logger(metaclass=Singleton):
             else:
                 formatted_msg = "##\n{}\t{}\n".format(msg_date, msg)
                 f.write(formatted_msg)
+            print(formatted_msg)
             self.interface_msgs.put(formatted_msg.strip('\n'))

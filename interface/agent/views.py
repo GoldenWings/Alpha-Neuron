@@ -24,34 +24,32 @@ class AgentView(LoginRequiredMixin, generic.TemplateView):
 
 
 def get_logs(request):
-    data = {}
+    data = {'status': Main.car.status.is_trainer}
     while not logger.interface_msgs.empty():
         logs = []
         log = logger.interface_msgs.get().replace('\n', '')
         log = log.replace('##', '')
         logs.append(log)
-        data = {'log': logs}
+        data['log'] = logs
+        if Main.car.status.is_trainer:
+            break
     return JsonResponse(data)
 
 
-def gen(is_rest):
-    while not is_rest:
+def gen():
+    while True:
         frame = Main.car.camera.byte_frame
         if frame is None:
-            print('now')
             continue
+        elif Main.car.status.is_trainer:
+            break
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-    http_rest = False
-
-
-http_rest = True
 
 
 @gzip.gzip_page
 def video(request):
     try:
-        is_rest = not http_rest
-        return StreamingHttpResponse(gen(is_rest), content_type="multipart/x-mixed-replace;boundary=frame")
+        return StreamingHttpResponse(gen(), content_type="multipart/x-mixed-replace;boundary=frame")
     except HttpResponseServerError as e:
         print("aborted")

@@ -29,6 +29,8 @@
 <!-- Google Font -->
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <!-- Terminal style -->
+    <link rel="stylesheet" href="{% static 'dist/css/terminal.css' %}">
 <style>
           #sensor
           {
@@ -92,31 +94,20 @@
             <!-- /.col -->
 
             <div class="col-md-6">
-                <!-- Controls -->
-                <div class="box box-danger">
+                <!-- Terminal Log -->
+                <div id="terminal" class="box box-danger">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Controls</h3>
+                        <h3 class="box-title">Terminal Log</h3>
                     </div>
                     <!-- /.box-header -->
-
-                    <div class="box-body no-padding" style="height: 150px;">
-                        <div class="arrowswrapper">
-                            <div class="arrowsbox a"></div>
-                            <div class="arrowsbox b"><a id="arrowsbox up" class="btn btn-app" style="font-size:22px;">
-                                &#8593;
-                            </a></div>
-                            <div class="arrowsbox c"></div>
-                            <div class="arrowsbox d"><a id="arrowsbox left" class="btn btn-app" style="font-size:24px;">
-                                &#8592;
-                            </a></div>
-                            <div class="arrowsbox e">
-                                <a id="arrowsbox down" class="btn btn-app" style="font-size:24px;"> &#8595;
-                                </a></div>
-                            <div class="arrowsbox f">
-                                <a id="arrowsbox right" class="btn btn-app" style="font-size:24px;"> &#8594;
-                                </a></div>
+                    <div class="box-body no-padding">
+                        <div class="shell-wrap">
+                            <ul id="log_table" class="shell-body">
+                                {% for i in log %}
+                                    {{ i }}
+                                {% endfor %}
+                            </ul>
                         </div>
-
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -143,28 +134,6 @@
         </div>
         <!-- /.box -->
 
-        <!-- Training Controls -->
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Training Controls</h3>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div style="margin:auto; padding:10px;">
-                    <a id="start" class="btn btn-app">
-                        <i class="fa fa-play"></i> Start Recording
-                    </a>
-                    <a id="pause" class="btn btn-app">
-                        <i class="fa fa-pause"></i> Pause
-                    </a>
-                    <a id="stop" class="btn btn-app">
-                        <i class="fa fa-save"></i> Stop Recording
-                    </a>
-                </div>
-            </div>
-            <!-- /.box-body -->
-        </div>
-        <!-- /.box -->
     </div>
     <!-- /.col -->
 </div>
@@ -205,6 +174,29 @@
 <!-- jQuery Knob -->
 <script src="{% static 'bower_components/jquery-knob/js/jquery.knob.js' %}"></script>
 <script>
+    function logs() {
+        $.ajax({
+            url: 'get_logs/?rand=' + Math.random(),
+            dataType: 'json',
+            success: function (data) {
+                if (data.status) {
+                    $('#agent-link').click();
+
+                }
+                $('#terminal').find('#log_table').append($("<li>").text(data.log));
+                if (data.log) {
+                    $('#terminal').find('#log_table').animate({
+                        scrollTop: $(
+                            $('#terminal').find('#log_table')
+                        ).prop("scrollHeight")
+                    }, 100);
+                }
+            }
+        });
+        setTimeout(logs, 100);
+    }
+
+    setTimeout(logs, 100);
         function knobfunction(value1){
             $("#cpu")
             .val(value1)
@@ -217,16 +209,19 @@
         }
         function update() {
             $.ajax({
-                    url: 'send_command/',
+                url: 'send_command/?rand=' + Math.random(),
                     data: {
                             'command': 'usage'
                         },
                     dataType: 'json',
                     success: function (data) {
-                                console.log('got here');
                                 knobfunction(data.processor);
                                 knobfunction2(data.ram);
-                                setTimeout(update, 5000);
+                        if (data.status) {
+                            window.location.href = "../agent/";
+                        }
+                        else
+                            setTimeout(update, 5000);
                             }
                         });
         }
@@ -257,15 +252,12 @@
     var realtime2 = 'on';;;;;;;;; //If == to on then fetch data every x seconds. else stop fetching
     function update2() {
         $.ajax({
-                url: 'send_command/',
+            url: 'send_command/?rand=' + Math.random(),
                 data: {
                     'command': 'radar'
                 },
                 dataType: 'json',
                 success: function (data) {
-                    if (data.status) {
-                        window.location.href = "../agent/";
-                    }
                     radarChartData = {
         labels: ["F3", "F4", "L", "B3", "B2", "B1", "R", "F1", "F2"],
             datasets: [

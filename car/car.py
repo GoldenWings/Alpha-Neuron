@@ -55,14 +55,6 @@ class Car(metaclass=Singleton):
                 continue
             obj.start()
 
-    def turn_right(self):
-        """This method turn the car right """
-        self._objects['servo'].turn_right()
-
-    def turn_left(self):
-        """This method turn the car left """
-        self._objects['servo'].turn_left()
-
     def set_angle(self, req_angle):
         self._objects['servo'].set_angle(req_angle)
 
@@ -102,9 +94,10 @@ class Car(metaclass=Singleton):
         """
         This method set the throttle of the car Usage: DrivingNN only!
         """
+        print(throttle)
         if throttle < 0:
             self._objects['motor'].set_dir(False)
-            self._objects['motor'].set_throttle(abs(throttle))
+            self._objects['motor'].set_throttle(abs(round(throttle, 2)))
         elif throttle >= 0:
             self._objects['motor'].set_dir()
             self._objects['motor'].set_throttle(throttle)

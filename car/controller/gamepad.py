@@ -10,26 +10,25 @@
 #     btn_logitech abort session
 import threading
 from datetime import datetime
-
-from evdev._ecodes import EV_KEY, EV_ABS, BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL, BTN_START, BTN_SELECT, BTN_MODE
-
-from car.hardware.config import ABS_Yaxis, ABs_Xaxis
+from asyncore import file_dispatcher, loop
+from evdev._ecodes import (EV_KEY, EV_ABS, BTN_A,
+                           BTN_B, BTN_X, BTN_Y, BTN_TR, BTN_TL, BTN_START, BTN_SELECT, BTN_MODE)
+from utility.utility import normalize
+from car.hardware.config import (ABS_Yaxis, ABs_Xaxis, throttle_min, throttle_max, angle_min, angle_max,
+                                 SERVO_EFFECTIVE_ANGLE)
 from car.hardware.f710 import F710
 from utility.singleton import Singleton
 
 
-class Gamepad(F710, threading.Thread, metaclass=Singleton):
+class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
 
     def __init__(self, objects):
         F710.__init__(self)
         threading.Thread.__init__(self)
+        file_dispatcher.__init__(self, self.f710)
         self.car = objects.get('car') 
         self.barrel_writer = objects.get('barrelwriter')
         self.logger = objects.get('logger')
-        self._abs_Yaxis_up = 0
-        self._abs_Yaxis_down = 0
-        self._abs_Xaxis_right = 0
-        self._abs_Xaxis_left = 0
         self._start_time = None
         self._end_time = None
 
@@ -88,7 +87,9 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                     self.logger.log("Unable to start recording, the car is on agent mode")
                 else:
                     if self.car.status.is_trainer:
-                        if self.car.status.is_paused:
+                        if self.car.status.is_recording:
+                            self.logger.log("There is an on-going recording in progress!")
+                        elif self.car.status.is_paused:
                             self.car.status.continue_recording()
                             self.logger.log('Continue recording')
                         else:
@@ -104,8 +105,11 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                         self.logger.log("Start aborting the session it may take some time")
                         self.car.status.reset_recording_status()
                         self._end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                        self.barrel_writer.abort_csv(self._start_time, self._end_time)
-                        self.logger.log("The session has been aborted successfully")
+                        self.logger.log("Aborting Session...")
+                        abort_thread = threading.Thread(name='AbortSession', target=self.barrel_writer.abort_csv,
+                                                        args=[self._start_time, self._end_time])
+                        abort_thread.start()
+                        abort_thread.join()
                     else:
                         self.logger.log("There is no session to abort")
             elif event.code == BTN_SELECT:
@@ -115,48 +119,47 @@ class Gamepad(F710, threading.Thread, metaclass=Singleton):
                 else:
                     if self.car.status.is_recording or self.car.status.is_paused:
                         self.car.status.reset_recording_status()
-                        self.barrel_writer.save_csv(self._start_time)
-                        self.logger.log('Save session ')
+                        self.logger.log('Session saving started...')
+                        save_thread = threading.Thread(name='SaveSession', target=self.barrel_writer.save_csv,
+                                                       args=[self._start_time])
+                        save_thread.start()
+                        save_thread.join()
                     else:
                         self.logger.log("There is no session to save")
         elif event.type == EV_ABS and self.car.status.is_trainer:
 
             if event.value < 0:
                 if event.code in ABS_Yaxis:
-                    self._abs_Yaxis_up += 1
-                    if self._abs_Yaxis_up > 5:
-                        self.car.move_forward()
-                        self._abs_Yaxis_up = 0
-                        self.logger.log("Going forward")
+                    throttle = normalize(event.value, -1, 1, throttle_min, throttle_max)
+                    self.car.set_throttle(throttle)
+                    self.logger.log("Going forward with throttle = " + str(throttle))
                 elif event.code in ABs_Xaxis:
-                    self._abs_Xaxis_left += 1
-                    if self._abs_Xaxis_left > 2:
-                        self.car.turn_left()
-                        self.logger.log("Going left with angel = {}".format(self.car.current_angle))
-                        self._abs_Xaxis_left = 0
-                        if self._abs_Xaxis_right < 3:
-                            self._abs_Xaxis_right = 0
+                    angle = normalize(event.value, SERVO_EFFECTIVE_ANGLE[0], SERVO_EFFECTIVE_ANGLE[1],
+                                      angle_min, angle_max)
+                    self.logger.log("Going left with angle = {}".format(self.car.current_angle))
+                    self.car.set_angle(angle)
 
             elif event.value > 0:
                 if event.code in ABS_Yaxis:
-                    self._abs_Yaxis_down += 1
-                    if self._abs_Yaxis_down > 5:
-                        self.car.move_backward()
-                        self._abs_Yaxis_down = 0
-                        self.logger.log("Going backward")
+                    throttle = normalize(event.value, -1, 1, throttle_min, throttle_max)
+                    self.car.set_throttle(throttle)
+                    self.logger.log("Going backward with throttle = " + str(throttle))
                 elif event.code in ABs_Xaxis:
-                    self._abs_Xaxis_right += 1
-                    if self._abs_Xaxis_right > 2:
-                        self.car.turn_right()
-                        self.logger.log("Going right with angle = {}".format(self.car.current_angle))
-                        self._abs_Xaxis_right = 0
-                        if self._abs_Xaxis_left < 3:
-                            self._abs_Xaxis_left = 0
+                    angle = normalize(event.value, SERVO_EFFECTIVE_ANGLE[0], SERVO_EFFECTIVE_ANGLE[1],
+                                      angle_min, angle_max)
+                    self.car.set_angle(angle)
+                    self.logger.log("Going right with angle = {}".format(self.car.current_angle))
+
+    def recv(self, ign=None):
+        return self.f710.read()
 
     def start(self):
         if not self.is_alive():
             super().start()
 
-    def run(self):
-        for event in self.f710.read_loop():
+    def handle_read(self):
+        for event in self.recv():
             self.categorize(event)
+
+    def run(self):
+        loop()

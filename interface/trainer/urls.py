@@ -10,6 +10,6 @@ urlpatterns = [
     url(r'^logout/', auth_views.logout, name='Logout'),
     url(r'^send_command/$', views.send_command, name='send_command'),
     url(r'^video/$', views.video, name='video'),
-    url(r'^logger/$', views.loggerFunc, name='logger')
+    url(r'^get_logs/$', views.get_logs, name='get_logs')
 
 ]

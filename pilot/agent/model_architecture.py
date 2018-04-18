@@ -30,12 +30,14 @@ def build_model():
     # Use Softmax to give percentage. 15 categories and find best one based off percentage 0.0-1.0
 
     # continous output of throttle
+    # binned_throttle_out = Dense(9, activation='softmax', name='throttle_out')(x)  # Reduce to 1 number, Positive number only
+
     throttle_out = Dense(1, activation='relu', name='throttle_out')(x)  # Reduce to 1 number, Positive number only
 
     model = Model(inputs=[img_in], outputs=[angle_out, throttle_out])
     model.compile(optimizer='adam',
                   loss={'angle_out': 'categorical_crossentropy',
-                        'throttle_out': 'mean_absolute_error'},
-                  loss_weights={'angle_out': 0.9, 'throttle_out': .001})
+                        'throttle_out': 'mean_absolute_error'},  # categorical for throttle
+                  loss_weights={'angle_out': 0.9, 'throttle_out': .001})  # throttle weights adjustment
 
     return model

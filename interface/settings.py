@@ -125,4 +125,4 @@ STATICFILES_DIRS = (os.path.join('static'),)
 LOGIN_REDIRECT_URL = '/agent/'
 LOGIN_URL = '/account/login'
 
-ALLOWED_HOSTS = ['192.168.1.103', '41.43.142.246', '192.168.43.60', '192.168.1.105', '192.168.1.111']
+ALLOWED_HOSTS = ['192.168.43.83']
