@@ -13,7 +13,7 @@ class PiCamera(Thread):
         # initialize the camera and stream
         self.status = objects.get('status')
         self.agent = objects.get('driving_nn')
-        self.barrel_writer = objects.get('barrelwriter')
+        self.barrel_writer = objects.get('barrel')
         self.resolution = resolution
         self.framerate = framerate
         self.camera = None
@@ -58,8 +58,7 @@ class PiCamera(Thread):
             self.byte_frame = self.stream.getvalue()
             self.frame = np.array(Image.open(io.BytesIO(self.byte_frame)))
             if self.status.is_recording:
-                self.barrel_writer.save_image(self.frame)
-
+                self.barrel_writer.put(self.frame)
             if not self.status.sensor_started:
                 self._close()
                 return

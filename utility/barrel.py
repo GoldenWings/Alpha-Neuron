@@ -1,11 +1,15 @@
-from .singleton import Singleton
 import csv
-from .barrel_config import *
+import threading
+from datetime import datetime
+from queue import Queue
+
 import cv2
+import numpy as np
 import pandas as pd
 from PIL import Image
-import numpy as np
-from datetime import datetime
+
+from .barrel_config import *
+from .singleton import Singleton
 
 
 # noinspection PyTypeChecker
@@ -23,6 +27,11 @@ class BarrelWriter(metaclass=Singleton):
             self.motor = objects.get('motor')
             self.logger = objects.get('logger')
             self.csv_name = None
+            self.frames_to_save = Queue()
+            self.start_saving = threading.Thread(name="Start saving image ",
+                                                 target=self.save_images(),
+                                                 args=())
+            self.start_saving.start()
 
         # noinspection PyMethodMayBeStatic
         def get_record(self, throttle, angle, img_name):
@@ -93,18 +102,21 @@ class BarrelWriter(metaclass=Singleton):
             self.logger.log("The session has been aborted successfully")
 
         # noinspection PyMethodMayBeStatic
-        def save_image(self, img):
-            """
-            :param img: image to be stored from picamera angle and throttle included
-            """
-            angle = self.servo.angle
-            throttle = self.motor.throttle
-            timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-            img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
-            full_name = os.path.expanduser(IMAGE_PATH + img_name)
+        def save_images(self, ):
+            while True:
+                try:
+                    img = self.frames_to_save.get()
+                    angle = self.servo.angle
+                    throttle = self.motor.throttle
+                    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                    img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
+                    full_name = os.path.expanduser(IMAGE_PATH + img_name)
+                    cv2.imwrite(full_name, img)
+                except Exception:
+                    pass
 
-            cv2.imwrite(full_name, img)
-
+        def put(self, image_frame):
+            self.frames_to_save.put(image_frame)
 
 class BarrelReader(metaclass=Singleton):
     def __init__(self, barrel_name=None):
