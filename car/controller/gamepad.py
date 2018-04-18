@@ -106,10 +106,7 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
                         self.car.status.reset_recording_status()
                         self._end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                         self.logger.log("Aborting Session...")
-                        abort_thread = threading.Thread(name='AbortSession', target=self.barrel_writer.abort_csv,
-                                                        args=[self._start_time, self._end_time])
-                        abort_thread.start()
-                        abort_thread.join()
+                        self.car.abort_session(self._start_time, self._end_time)
                     else:
                         self.logger.log("There is no session to abort")
             elif event.code == BTN_SELECT:
@@ -120,10 +117,7 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
                     if self.car.status.is_recording or self.car.status.is_paused:
                         self.car.status.reset_recording_status()
                         self.logger.log('Session saving started...')
-                        save_thread = threading.Thread(name='SaveSession', target=self.barrel_writer.save_csv,
-                                                       args=[self._start_time])
-                        save_thread.start()
-                        save_thread.join()
+                        self.car.save_session(self._start_time)
                     else:
                         self.logger.log("There is no session to save")
         elif event.type == EV_ABS and self.car.status.is_trainer:
