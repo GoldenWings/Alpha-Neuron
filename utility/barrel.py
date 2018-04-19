@@ -1,6 +1,5 @@
 import csv
 import threading
-from datetime import datetime
 from queue import Queue
 
 import cv2
@@ -19,19 +18,13 @@ class BarrelWriter(metaclass=Singleton):
             """
             :param objects: contains all objects required for the class
             """
-            # I took objects of servo and motor instead of car to avoid circular dependencies
-            # because picamera has reference to this class.
-            # Picamera.barrel_writies._car.picamera.barrel_writer << :D
-
-            self.servo = objects.get('servo')
-            self.motor = objects.get('motor')
+            self.status = objects.get('status')
             self.logger = objects.get('logger')
+            self._start_saving = threading.Thread(name="Start saving image ",
+                                                  target=self.save_images,
+                                                  args=())
             self.csv_name = None
             self.frames_to_save = Queue()
-            self.start_saving = threading.Thread(name="Start saving image ",
-                                                 target=self.save_images(),
-                                                 args=())
-            self.start_saving.start()
 
         # noinspection PyMethodMayBeStatic
         def get_record(self, throttle, angle, img_name):
@@ -101,22 +94,31 @@ class BarrelWriter(metaclass=Singleton):
                             os.remove(IMAGE_PATH + name)
             self.logger.log("The session has been aborted successfully")
 
+        def start_saving(self):
+            self._start_saving = threading.Thread(name="Start saving image ",
+                                                  target=self.save_images,
+                                                  args=())
+            self._start_saving.start()
+
         # noinspection PyMethodMayBeStatic
-        def save_images(self, ):
-            while True:
+        def save_images(self):
+            while self.status.is_recording:
                 try:
-                    img = self.frames_to_save.get()
-                    angle = self.servo.angle
-                    throttle = self.motor.throttle
-                    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                    frame_state = self.frames_to_save.get()
+                    img = frame_state['img']
+                    angle = frame_state['angle']
+                    throttle = frame_state['throttle']
+                    timestamp = frame_state['timestamp']
                     img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
                     full_name = os.path.expanduser(IMAGE_PATH + img_name)
                     cv2.imwrite(full_name, img)
+                    self.frames_to_save.task_done()
                 except Exception:
                     pass
 
         def put(self, image_frame):
             self.frames_to_save.put(image_frame)
+
 
 class BarrelReader(metaclass=Singleton):
     def __init__(self, barrel_name=None):

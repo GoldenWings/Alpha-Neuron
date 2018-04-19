@@ -1,6 +1,6 @@
 import io
 from threading import Thread
-
+from datetime import datetime
 import numpy as np
 import picamera
 from PIL import Image
@@ -11,9 +11,9 @@ class PiCamera(Thread):
     def __init__(self, objects, resolution=(160, 120), framerate=20):
         Thread.__init__(self)
         # initialize the camera and stream
-        self.status = objects.get('status')
-        self.agent = objects.get('driving_nn')
-        self.barrel_writer = objects.get('barrel')
+        self.car = objects.get('car')
+        self.status = self.car.status
+        self.agent = self.car.driving_nn
         self.resolution = resolution
         self.framerate = framerate
         self.camera = None
@@ -58,7 +58,10 @@ class PiCamera(Thread):
             self.byte_frame = self.stream.getvalue()
             self.frame = np.array(Image.open(io.BytesIO(self.byte_frame)))
             if self.status.is_recording:
-                self.barrel_writer.put(self.frame)
+                frame_state = {'img': self.frame, 'angle': self.car.current_angle,
+                               'throttle': self.car.current_speed,
+                               'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+                self.car.barrel_writer.put(frame_state)
             if not self.status.sensor_started:
                 self._close()
                 return

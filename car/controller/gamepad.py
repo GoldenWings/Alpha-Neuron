@@ -91,10 +91,12 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
                             self.logger.log("There is an on-going recording in progress!")
                         elif self.car.status.is_paused:
                             self.car.status.continue_recording()
+                            self.car.barrel_writer.start_saving()
                             self.logger.log('Continue recording')
                         else:
                             self._start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                             self.car.status.start_recording()
+                            self.car.barrel_writer.start_saving()
                             self.logger.log('Start recording')
             elif event.code == BTN_MODE:
                 # logitech main BTN

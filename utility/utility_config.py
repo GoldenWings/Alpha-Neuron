@@ -2,7 +2,7 @@ from utility.config import Config
 status_config = Config(name='status', class_name='Status', inputs=None, outputs=None, is_active=True, is_threaded=False)
 barrelwriter_cfg = Config(name='barrelwriter', class_name='BarrelWriter', inputs=['throttle', 'angle',
                                                                                   'image_frame'],
-                          outputs=None, is_active=True, is_threaded=False, parameters=['servo', 'motor', 'logger'])
+                          outputs=None, is_active=True, is_threaded=False, parameters=['status', 'logger'])
 barrelreader_cfg = Config(name='barrelreader', class_name='BarrelReader', inputs=None,
                           outputs=None, is_active=True, is_threaded=False)
 
