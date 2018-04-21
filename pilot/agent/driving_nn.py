@@ -1,6 +1,6 @@
 import queue
 import threading
-import numpy as np
+from utility.utility import *
 import keras
 from car.hardware.config import SERVO_EFFECTIVE_ANGLE
 from car.trainer_config import *
@@ -43,31 +43,24 @@ class DrivingNeuralNetwork:
                                                   args=())
         self.prediction_thread.start()
 
-    @staticmethod
-    def denormalize(normalized):
-        min_angle = SERVO_EFFECTIVE_ANGLE[0]
-        max_angle = SERVO_EFFECTIVE_ANGLE[1]
-        denormalized = ((normalized + 1) * (max_angle - min_angle) + (2 * min_angle)) / 2
-        return denormalized
-
-    @staticmethod
-    def linear_unbin(arr):
-        b = np.argmax(arr)
-        a = b * (2 / 14) - 1
-        return a
-
     def predict_from_queue(self):
         while self._car.status.is_agent:
             with self.graph.as_default():
                 frame = self.frame_queue.get()
                 img_arr = frame.reshape((1,) + frame.shape)
                 binned_angle, throttle = self.model.predict(img_arr)
-                unbinned_angle = DrivingNeuralNetwork.linear_unbin(binned_angle)
-                angle = DrivingNeuralNetwork.denormalize(unbinned_angle)
+                unbinned_angle = linear_unbin(binned_angle)
+                angle = denormalize(unbinned_angle, SERVO_EFFECTIVE_ANGLE[0], SERVO_EFFECTIVE_ANGLE[1])
+                N = len(throttle[0])
+
+                if N > 0:
+                    throttle = linear_unbin(throttle, N=N, offset=0.0, R=0.5)
+                else:
+                    throttle = throttle[0][0]
                 prediction = "Unbinned steering angle {} " \
-                             " final angle {} throttle = {}".format(unbinned_angle, angle, throttle[0][0])
+                             " final angle {} throttle = {}".format(unbinned_angle, angle, throttle)
                 self._car.set_angle(angle)
-                self._car.set_throttle(1)
+                self._car.set_throttle(throttle)
                 self._logger.log(prediction)
                 self.frame_queue.task_done()
 
