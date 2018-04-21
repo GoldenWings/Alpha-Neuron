@@ -49,14 +49,11 @@ class Md10c:
         """
         self._md10c_speed = requested_speed
         if requested_speed == 0:
-            print("B2oolk 22of ya 8abi ")
             self.p.ChangeFrequency(1)
             self.p.ChangeDutyCycle(0)
             return
         else:
-            print('Requested speed' + str(requested_speed))
             speed = (float(self._md10c_freq) * float(requested_speed))  # calculate the speed required in Hz
-            print("the speed is {} after rounding is {} ".format(str(speed), round(speed, 2)))
             self.p.ChangeFrequency(speed)  # changing the frequency of pulse to the frequency of required speed
             self.p.ChangeDutyCycle(100 * requested_speed)  # setup the required duty cycle for the required speed)
 
