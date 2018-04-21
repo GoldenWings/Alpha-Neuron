@@ -99,9 +99,9 @@ class Car(metaclass=Singleton):
                              args=[start_time])
         save_thread.start()
 
-    def abort_session(self, start_time, end_time):
+    def abort_session(self):
         abort_thread = Thread(name='AbortSession', target=self.barrel_writer.abort_csv,
-                              args=[start_time, end_time])
+                              args=())
         abort_thread.start()
 
     def set_throttle(self, throttle):
