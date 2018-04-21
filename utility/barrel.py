@@ -1,13 +1,13 @@
 import csv
 import threading
 from queue import Queue
-
+from pathlib import Path
 import cv2
-import numpy as np
 import pandas as pd
 from PIL import Image
-
+import shutil
 from .barrel_config import *
+from .utility import *
 from .singleton import Singleton
 
 
@@ -23,6 +23,7 @@ class BarrelWriter(metaclass=Singleton):
             self._start_saving = threading.Thread(name="Start saving image ",
                                                   target=self.save_images,
                                                   args=())
+            self.file_path = DATA_PATH
             self.csv_name = None
             self.frames_to_save = Queue()
 
@@ -48,9 +49,10 @@ class BarrelWriter(metaclass=Singleton):
             self.csv_name = 'session_' + timestamp + '.csv'
             self.logger.log('csv name {}'.format(self.csv_name))
             headers = {'angle', 'throttle', 'image'}
-            with open(DATA_PATH + self.csv_name, 'a') as f:
+            with open(self.file_path + self.csv_name, 'a') as f:
                 w = csv.DictWriter(f, headers)
                 w.writeheader()
+                IMAGE_PATH = self.file_path + 'Images/'
                 image_files = os.listdir(IMAGE_PATH)
                 counter = 0
                 for name in image_files:
@@ -73,25 +75,14 @@ class BarrelWriter(metaclass=Singleton):
             self.logger.log('Session has been saved successfully!. ')
 
         # noinspection PyMethodMayBeStatic
-        def abort_csv(self, start_time, end_time):
+        def abort_csv(self):
             """
             loop through all files ing IMG_PATH/ , check if its a file or direction
             if file split the date then compare date if it fall between the interval then remove image
-            :param start_time: session beginning time
-            :param end_time: session end time
             :return:
             """
-            start_time = datetime.strptime(start_time,  '%Y-%m-%d %H:%M:%S.%f')
-            end_time = datetime.strptime(end_time,  '%Y-%m-%d %H:%M:%S.%f')
-            for name in os.listdir(IMAGE_PATH):
-                if os.path.isfile(os.path.join(IMAGE_PATH, name)):
-                    if os.path.splitext(name)[1] == '.jpg':
-                        full_date = name.split(' ')
-                        date = full_date[0].split('_')[1]
-                        time = full_date[1].split('_')[0]
-                        image_date = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M:%S.%f')
-                        if start_time <= image_date <= end_time:
-                            os.remove(IMAGE_PATH + name)
+            self.logger.log("removing {}".format(self.file_path))
+            shutil.rmtree(self.file_path, ignore_errors=True)
             self.logger.log("The session has been aborted successfully")
 
         def start_saving(self):
@@ -99,6 +90,12 @@ class BarrelWriter(metaclass=Singleton):
                                                   target=self.save_images,
                                                   args=())
             self._start_saving.start()
+
+        def make_session_dir(self):
+            count = sum(os.path.isdir('{}/{}'.format(DATA_PATH, i)) for i in os.listdir(DATA_PATH))
+            self.file_path = '{}session_{}/'.format(DATA_PATH, str(count))
+            Path(self.file_path).mkdir(exist_ok=True)
+            Path(self.file_path + 'Images').mkdir(exist_ok=True)
 
         # noinspection PyMethodMayBeStatic
         def save_images(self):
@@ -110,10 +107,11 @@ class BarrelWriter(metaclass=Singleton):
                     throttle = frame_state['throttle']
                     timestamp = frame_state['timestamp']
                     img_name = "img_%s_ttl_%.3f_agl_%.1f%s" % (timestamp, throttle, angle, ".jpg")
+                    IMAGE_PATH = self.file_path + 'Images/'
                     full_name = os.path.expanduser(IMAGE_PATH + img_name)
                     cv2.imwrite(full_name, img)
                     self.frames_to_save.task_done()
-                except Exception:
+                except Exception as e:
                     pass
 
         def put(self, image_frame):
@@ -129,11 +127,13 @@ class BarrelReader(metaclass=Singleton):
         """
         self.latest = True if not barrel_name else False
         self.barrel_name = barrel_name
+        self.file_path = None
         self.df = None
 
     # noinspection PyMethodMayBeStatic
     def get_image(self, img_path):
-        img = Image.open(IMAGE_PATH+img_path)
+        image_path = self.file_path + 'Images/'
+        img = Image.open(image_path + img_path)
         img_arr = np.array(img)
         return img_arr
 
@@ -157,8 +157,10 @@ class BarrelReader(metaclass=Singleton):
         :return:
         """
         if self.latest:
-            latest_csv_name = get_latest_csv()
-            barrel_full_name = DATA_PATH + str(latest_csv_name)
+            count = sum(os.path.isdir(i) for i in os.listdir(DATA_PATH))
+            self.file_path = '{}session_{}/'.format(DATA_PATH, str(count))
+            latest_csv_name = get_latest_csv(self.file_path)
+            barrel_full_name = self.file_path + str(latest_csv_name)
             return barrel_full_name
         if os.path.isfile(os.path.join(DATA_PATH, self.barrel_name)):
             return DATA_PATH + self.barrel_name
@@ -171,23 +173,6 @@ class BarrelReader(metaclass=Singleton):
         """
         self.df = pd.read_csv(self.get_csv())
 
-    @staticmethod
-    def normalize(given_angle):
-        min_angle = SERVO_EFFECTIVE_ANGLE[0]
-        max_angle = SERVO_EFFECTIVE_ANGLE[1]
-        normalized = 2 * (given_angle - min_angle) / (max_angle - min_angle) - 1
-        return normalized
-
-    @staticmethod
-    def linear_bin(a):
-        a = BarrelReader.normalize(a)
-        a = a + 1
-        b = round(a / (2 / 14))
-        arr = np.zeros(15)
-
-        arr[int(b)] = 1
-        return arr
-
     def generate_record(self, df=None):
         """
         read csv records (with images instead of path) and shuffle it
@@ -199,8 +184,10 @@ class BarrelReader(metaclass=Singleton):
         while True:
             for _ in df.iterrows():
                 record_dict = df.sample(n=1).to_dict(orient='record')[0]
-                record_dict['angle'] = BarrelReader.linear_bin(record_dict['angle'])
-
+                normalized_angle = normalize(record_dict['angle'], -1, 1,
+                                             SERVO_EFFECTIVE_ANGLE[0], SERVO_EFFECTIVE_ANGLE[1])
+                record_dict['angle'] = linear_bin(normalized_angle)
+                record_dict['throttle'] = linear_bin(record_dict['throttle'], N=9, offset=0, R=0.5)
                 record_dict = self.get_record(record_dict)
                 yield record_dict
 
