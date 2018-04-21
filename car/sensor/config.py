@@ -23,7 +23,7 @@ picam_inputs = None
 picam_outputs = {'output_name': 'image_frame', 'output_type': 'sarray'}
 picam_config = Config(name='camera', class_name='PiCamera', inputs=picam_inputs, outputs=picam_outputs,
                       is_active=True, is_threaded=True,
-                      parameters=['car'])
+                      parameters=['car', 'status', 'driving_nn'])
 
 # Package Configuration
 sensor_modules = {us_config.name: us_config,picam_config.name: picam_config}
