@@ -30,7 +30,6 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
         self.barrel_writer = objects.get('barrelwriter')
         self.logger = objects.get('logger')
         self._start_time = None
-        self._end_time = None
 
     def categorize(self, event):
         """
@@ -96,6 +95,7 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
                         else:
                             self._start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                             self.car.status.start_recording()
+                            self.car.barrel_writer.make_session_dir()
                             self.car.barrel_writer.start_saving()
                             self.logger.log('Start recording')
             elif event.code == BTN_MODE:
@@ -106,9 +106,8 @@ class Gamepad(F710, file_dispatcher, threading.Thread, metaclass=Singleton):
                     if self.car.status.is_recording or self.car.status.is_paused:
                         self.logger.log("Start aborting the session it may take some time")
                         self.car.status.reset_recording_status()
-                        self._end_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                         self.logger.log("Aborting Session...")
-                        self.car.abort_session(self._start_time, self._end_time)
+                        self.car.abort_session()
                     else:
                         self.logger.log("There is no session to abort")
             elif event.code == BTN_SELECT:
