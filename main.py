@@ -208,7 +208,7 @@ class Main(metaclass=Singleton):
                 if p_object[2]:  # if threaded add to threaded non parameterized dictionary
                     self.non_p_objects[param] = p_object[0]
                 else:
-                    self.non_tp_objects[param] = p_object
+                    self.non_tp_objects[param] = p_object[0]
         return p_param
 
 
