@@ -54,7 +54,7 @@ class DrivingNeuralNetwork:
                 N = len(throttle[0])
 
                 if N > 0:
-                    throttle = linear_unbin(throttle, N=N, offset=0.0, R=0.5)
+                    throttle = linear_unbin(throttle, N=N, offset=0.0, R=1)
                 else:
                     throttle = throttle[0][0]
                 prediction = "Unbinned steering angle {} " \
