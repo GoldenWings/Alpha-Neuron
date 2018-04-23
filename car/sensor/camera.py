@@ -58,6 +58,8 @@ class PiCamera(Thread):
             self.byte_frame = self.stream.getvalue()
             self.frame = np.array(Image.open(io.BytesIO(self.byte_frame)))
             if self.status.is_recording:
+                if self.car.current_speed < 0:
+                    continue
                 frame_state = {'img': self.frame, 'angle': self.car.current_angle,
                                'throttle': self.car.current_speed,
                                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
