@@ -187,7 +187,7 @@ class BarrelReader(metaclass=Singleton):
                 normalized_angle = normalize(record_dict['angle'], -1, 1,
                                              SERVO_EFFECTIVE_ANGLE[0], SERVO_EFFECTIVE_ANGLE[1])
                 record_dict['angle'] = linear_bin(normalized_angle)
-                record_dict['throttle'] = linear_bin(record_dict['throttle'], N=9, offset=0, R=0.5)
+                record_dict['throttle'] = linear_bin(record_dict['throttle'], N=4, offset=0, R=1)
                 record_dict = self.get_record(record_dict)
                 yield record_dict
 
