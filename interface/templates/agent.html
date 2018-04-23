@@ -67,13 +67,20 @@ class="hold-transition skin-blue sidebar-mini"
         <div class="row">
             <div class="col-md-6">
                 <!-- Hardware usage -->
-                <div class="box box-warning direct-chat direct-chat-warning">
+                <div class="box box-warning direct-chat direct-chat-warning" style="height: 180px;">
                     <div class="box-header with-border">
                         <h3 class="box-title">Hardware usage</h3>
                     </div>
                     <!-- /.box-header -->
-                    <div class="box-body">
-                        <div id="interactive" style="height: 120px; width:400px;"></div>
+                    <div style="float: right; margin-up:10px; margin-right:60px;">
+                        <input id="cpu" type="text" class="knob" value="90" data-width="90" data-height="90"
+                               data-fgColor="#3c8dbc">
+                        <div class="knob-label">CPU</div>
+                    </div>
+                    <div style="float: left; margin-up:10px; margin-left: 60px;">
+                        <input id="ram" type="text" class="knob" value="90" data-width="90" data-height="90"
+                               data-fgColor="#39CCCC">
+                        <div class="knob-label">ram</div>
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -162,10 +169,8 @@ class="hold-transition skin-blue sidebar-mini"
 <script src="{% static 'bower_components/Flot/jquery.flot.pie.js' %}"></script>
 <!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
 <script src="{% static 'bower_components/Flot/jquery.flot.categories.js' %}"></script>
-<!-- Maps -->
-<script src="{% static 'dist/js/maps.js' %}"></script>
-<!-- Google Map -->
-<script src="https://maps.googleapis.com/maps/api/js?callback=myMap"></script>
+    <!-- jQuery Knob -->
+    <script src="{% static 'bower_components/jquery-knob/js/jquery.knob.js' %}"></script>
 <script>
     /*
      * Flot Interactive Chart
@@ -290,16 +295,58 @@ class="hold-transition skin-blue sidebar-mini"
         update2()
     }
 
+    function knobfunction(value1) {
+        $("#cpu")
+            .val(value1)
+            .trigger('change');
+    }
+
+    function knobfunction2(value1) {
+        $("#ram")
+            .val(value1)
+            .trigger('change');
+    }
+
+    function update() {
+        $.ajax({
+            url: 'send_command/',
+            data: {
+                'command': 'usage'
+            },
+            dataType: 'json',
+            success: function (data) {
+                knobfunction(data.processor);
+                knobfunction2(data.ram);
+                if (data.status) {
+                    $('#agent-link').click();
+                }
+                else
+                    setTimeout(update, 5000);
+            }
+        });
+    }
+
+    update();
+    $(".knob").knob({
+        'change': function (v) {
+            console.log(v);
+        }
+    });
+
+    /*
+     * END Hardwareusage CHART
+     */
     function logs() {
         $.ajax({
             url: 'get_logs/',
             dataType: 'json',
             success: function (data) {
-                console.log(data)
+                console.log(data.status);
                 if (data.status) {
-                    $('#trainer-link').click();
+                    document.getElementById('trainer-link').click();
                 }
-                $('#terminal').find('#log_table').append($("<li>").text(data.log));
+                else {
+                    $('#terminal').find('#log_table').append($("<li>").text(data.log));
                 if (data.log) {
                     $('#terminal').find('#log_table').animate({
                         scrollTop: $(
@@ -308,10 +355,86 @@ class="hold-transition skin-blue sidebar-mini"
                     }, 100);
                 }
                 setTimeout(logs, 100)
+                }
             }
         })
     }
 
     setTimeout(logs, 100)
+
+    var radarChartData = {
+        labels: ["F3", "F4", "R", "B3", "B2", "B1", "L", "F1", "F2"],
+        datasets: [
+            {
+                label: "My Second dataset",
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",
+                data: [5, 10, 15, 20, 25, 30, 37, 28, 40]
+            }
+        ]
+    };
+
+    var updateInterval2 = 2500;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ; //Fetch data ever x milliseconds
+    var realtime2 = 'on';
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ; //If == to on then fetch data every x seconds. else stop fetching
+    function update2() {
+        $.ajax({
+            url: 'send_command/',
+            data: {
+                'command': 'radar'
+            },
+            dataType: 'json',
+            success: function (data) {
+                radarChartData = {
+                    labels: ["F3", "F4", "L", "B3", "B2", "B1", "R", "F1", "F2"],
+                    datasets: [
+                        {
+                            label: "My Second dataset",
+                            fillColor: "rgba(151,187,205,0.2)",
+                            strokeColor: "rgba(151,187,205,1)",
+                            pointColor: "rgba(151,187,205,1)",
+                            pointStrokeColor: "#fff",
+                            pointHighlightFill: "#fff",
+                            pointHighlightStroke: "rgba(151,187,205,1)",
+                            data: data.radar
+                        }
+                    ]
+                };
+                window.myRadar = new Chart(document.getElementById("canvas").getContext("2d")).Radar(radarChartData, {
+                    responsive: true
+                });
+            }
+        });
+        window.myRadar = new Chart(document.getElementById("canvas").getContext("2d")).Radar(radarChartData, {
+            responsive: true
+        });
+
+        if (realtime2 === 'on')
+            setTimeout(update2, updateInterval2)
+    }
+
+    //INITIALIZE REALTIME DATA FETCHING
+    if (realtime2 === 'on') {
+        update2()
+    }
 </script>
 {% endblock %}

@@ -48,8 +48,6 @@ def gen():
         frame = Main.car.camera.byte_frame
         if frame is None:
             continue
-        elif Main.car.status.is_agent:
-            break
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
@@ -70,7 +68,4 @@ def get_logs(request):
         log = log.replace('##', '')
         logs.append(log)
         data['log'] = logs
-        if Main.car.status.is_agent:
-            print('UMMM')
-            break
     return JsonResponse(data)

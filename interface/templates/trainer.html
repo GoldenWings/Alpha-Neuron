@@ -119,21 +119,24 @@
 
     </div>
     <!-- /.col -->
+
     <div class="col-md-4">
+        <!-- Map -->
+
+        <!-- /.box -->
 
         <!-- Sensor Map -->
-        <div class="box box-default">
+        <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">Sensor Map</h3>
+                <h3 class="box-title">SensorMap</h3>
             </div>
             <!-- /.box-header -->
-            <div id="sensor" class="box-body" style="height: 340px;">
-                <canvas id="canvas" height="325px" width="425px"></canvas>
+            <div class="box-body" style="height: 240px;">
+                <canvas id="canvas" height="225px" width="400px"></canvas>
             </div>
             <!-- /.box-body -->
         </div>
         <!-- /.box -->
-
     </div>
     <!-- /.col -->
 </div>
@@ -154,7 +157,7 @@
 <script src="{% static 'bower_components/jquery-sparkline/dist/jquery.sparkline.min.js' %}"></script>
 <!-- jvectormap  -->
 <script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
-<script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' $}"></script>
+    <script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
 <!-- SlimScroll -->
 <script src="{% static 'bower_components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
 <!-- ChartJS -->
@@ -176,20 +179,22 @@
 <script>
     function logs() {
         $.ajax({
-            url: 'get_logs/?rand=' + Math.random(),
+            url: 'get_logs/',
             dataType: 'json',
             success: function (data) {
                 if (data.status) {
-                    $('#agent-link').click();
+                    document.getElementById('agent-link').click();
 
                 }
-                $('#terminal').find('#log_table').append($("<li>").text(data.log));
+                else {
+                    $('#terminal').find('#log_table').append($("<li>").text(data.log));
                 if (data.log) {
                     $('#terminal').find('#log_table').animate({
                         scrollTop: $(
                             $('#terminal').find('#log_table')
                         ).prop("scrollHeight")
                     }, 100);
+                }
                 }
             }
         });
@@ -209,7 +214,7 @@
         }
         function update() {
             $.ajax({
-                url: 'send_command/?rand=' + Math.random(),
+                url: 'send_command/',
                     data: {
                             'command': 'usage'
                         },
@@ -218,7 +223,7 @@
                                 knobfunction(data.processor);
                                 knobfunction2(data.ram);
                         if (data.status) {
-                            window.location.href = "../agent/";
+                            $('#agent-link').click();
                         }
                         else
                             setTimeout(update, 5000);
@@ -252,7 +257,7 @@
     var realtime2 = 'on';;;;;;;;; //If == to on then fetch data every x seconds. else stop fetching
     function update2() {
         $.ajax({
-            url: 'send_command/?rand=' + Math.random(),
+            url: 'send_command/',
                 data: {
                     'command': 'radar'
                 },

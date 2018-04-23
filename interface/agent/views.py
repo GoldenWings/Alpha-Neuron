@@ -7,6 +7,7 @@ from django.views import generic
 from main import Main as Access
 from django.views.decorators import gzip
 from django.http import HttpResponseServerError, StreamingHttpResponse, JsonResponse
+import psutil
 
 Main = Access()
 logger = Access.logger
@@ -31,8 +32,26 @@ def get_logs(request):
         log = log.replace('##', '')
         logs.append(log)
         data['log'] = logs
-        if Main.car.status.is_trainer:
-            break
+    return JsonResponse(data)
+
+
+def send_command(request):
+    radar = []
+    processor = 0
+    ram = 0
+    command = request.GET.get('command', None)
+    if command is None:
+        return
+    elif command == 'radar':
+        radar = list(Main.car.ultrasonic.get_frame().values())
+    elif command == 'usage':
+        processor = psutil.cpu_percent()
+        ram = psutil.virtual_memory().used / psutil.virtual_memory().total * 100
+    elif command == 'get_data':
+        speed = Main.car.current_speed
+    speed = Main.car.current_speed
+    data = {'speed': speed, 'radar': radar, 'processor': processor, 'ram': ram, 'status':
+        Main.car.status.is_trainer}
     return JsonResponse(data)
 
 
@@ -41,8 +60,6 @@ def gen():
         frame = Main.car.camera.byte_frame
         if frame is None:
             continue
-        elif Main.car.status.is_trainer:
-            break
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
