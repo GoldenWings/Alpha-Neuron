@@ -48,7 +48,7 @@ def build_model(input_shape=(120, 160, 3)):
     # Use Softmax to give percentage. 15 categories and find best one based off percentage 0.0-1.0
 
     # continous output of throttle
-    throttle_out = Dense(9, activation='softmax', name='throttle_out')(x)  # Reduce to 1 number,
+    throttle_out = Dense(4, activation='softmax', name='throttle_out')(x)  # Reduce to 1 number,
     #  Positive number only
 
     model = Model(inputs=[img_in], outputs=[angle_out, throttle_out])
